@@ -2,95 +2,125 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Custom font faces */
+@font-face {
+  font-family: 'SF Pro Display';
+  src: local('SF Pro Display'), local('SFProDisplay-Regular');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: local('SF Pro Display Bold'), local('SFProDisplay-Bold');
+  font-weight: 700;
+}
+
+/* CSS Variables for fonts */
+:root {
+  --font-interface: 'Inter', system-ui, sans-serif;
+  --font-content: 'Merriweather', Georgia, serif;
+}
+
+/* Design System - Modern Note-Taking App */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Warm neutral palette */
+    --background: 40 20% 98%;
+    --foreground: 30 10% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 40 25% 96%;
+    --card-foreground: 30 10% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 40 20% 98%;
+    --popover-foreground: 30 10% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Warm amber accent */
+    --primary: 35 90% 50%;
+    --primary-foreground: 40 20% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 35 15% 92%;
+    --secondary-foreground: 30 10% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 35 10% 94%;
+    --muted-foreground: 30 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 35 80% 55%;
+    --accent-foreground: 40 20% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 35 15% 88%;
+    --input: 35 15% 90%;
+    --ring: 35 90% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar */
+    --sidebar-background: 35 18% 95%;
+    --sidebar-foreground: 30 10% 25%;
+    --sidebar-primary: 35 90% 50%;
+    --sidebar-primary-foreground: 40 20% 98%;
+    --sidebar-accent: 35 25% 90%;
+    --sidebar-accent-foreground: 30 10% 20%;
+    --sidebar-border: 35 15% 88%;
+    --sidebar-ring: 35 90% 50%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Custom tokens */
+    --note-hover: 35 30% 93%;
+    --tag-bg: 35 60% 90%;
+    --tag-text: 35 70% 35%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Blue-cyan tinted dark background */
+    --background: 210 25% 8%;
+    --foreground: 200 15% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 210 22% 11%;
+    --card-foreground: 200 15% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 210 22% 10%;
+    --popover-foreground: 200 15% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 190 85% 50%;
+    --primary-foreground: 210 25% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 18% 16%;
+    --secondary-foreground: 200 15% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 15% 18%;
+    --muted-foreground: 200 10% 55%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 190 75% 45%;
+    --accent-foreground: 210 25% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 210 18% 20%;
+    --input: 210 18% 18%;
+    --ring: 190 85% 50%;
+
+    --sidebar-background: 210 28% 6%;
+    --sidebar-foreground: 200 15% 85%;
+    --sidebar-primary: 190 85% 50%;
+    --sidebar-primary-foreground: 210 25% 8%;
+    --sidebar-accent: 210 22% 13%;
+    --sidebar-accent-foreground: 200 15% 90%;
+    --sidebar-border: 210 18% 16%;
+    --sidebar-ring: 190 85% 50%;
+
+    --note-hover: 210 22% 14%;
+    --tag-bg: 190 40% 18%;
+    --tag-text: 190 70% 70%;
+    --success: 142 60% 40%;
+    --success-foreground: 0 0% 100%;
   }
 }
 
@@ -100,6 +130,125 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: var(--font-interface);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+
+  /* Smooth transitions globally */
+  input, textarea, button, a, select {
+    @apply transition-colors duration-150;
+  }
+}
+
+@layer components {
+  .note-content {
+    font-family: var(--font-content);
+    line-height: 1.8;
+  }
+
+  /* Markdown preview styling */
+  .note-content h1 {
+    @apply text-3xl font-bold mt-6 mb-3;
+    font-family: var(--font-interface);
+  }
+
+  .note-content h2 {
+    @apply text-2xl font-bold mt-5 mb-2;
+    font-family: var(--font-interface);
+  }
+
+  .note-content h3 {
+    @apply text-xl font-bold mt-4 mb-2;
+    font-family: var(--font-interface);
+  }
+
+  .note-content p {
+    @apply mb-4;
+  }
+
+  .note-content ul, .note-content ol {
+    @apply ml-6 mb-4;
+  }
+
+  .note-content li {
+    @apply mb-1;
+  }
+
+  .note-content strong {
+    @apply font-bold;
+  }
+
+  .note-content em {
+    @apply italic;
+  }
+
+  /* Markdown editor textarea styling */
+  .markdown-editor {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .glass-effect {
+    @apply bg-card/80 backdrop-blur-sm;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .hover-lift:hover {
+    @apply -translate-y-0.5 shadow-md;
+  }
+
+  /* React Flow theme fixes */
+  .workflow-container .react-flow__controls {
+    @apply bg-card border-border shadow-lg;
+  }
+
+  .workflow-container .react-flow__controls-button {
+    @apply bg-card border-border text-foreground fill-foreground;
+  }
+
+  .workflow-container .react-flow__controls-button:hover {
+    @apply bg-muted;
+  }
+
+  .workflow-container .react-flow__controls-button svg {
+    @apply fill-current;
+  }
+
+  .workflow-container .react-flow__minimap {
+    @apply bg-card border-border;
+  }
+
+  .workflow-container .react-flow__background {
+    @apply bg-background;
+  }
+
+  /* Mobile-specific touch targets */
+  @media (max-width: 767px) {
+    .note-content {
+      font-size: 16px;
+      line-height: 1.7;
+    }
   }
 }
