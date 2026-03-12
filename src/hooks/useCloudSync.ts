@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useCallback, useRef, useState } from 'react';
+import { supabase, isCloudConfigured } from '@/integrations/supabase/client';
 import { Note, Folder, Todo, CalendarTask } from '@/types/notes';
 import { User } from '@supabase/supabase-js';
 import { Customization } from './useCustomization';
@@ -16,7 +16,7 @@ export function useCloudSync(user: User | null) {
     calendarTasks: CalendarTask[];
     customization?: Customization | null;
   } | null> => {
-    if (!user) return null;
+    if (!user || !isCloudConfigured) return null;
 
     try {
       const [notesRes, foldersRes, todosRes, tasksRes, customRes] = await Promise.all([
@@ -91,7 +91,7 @@ export function useCloudSync(user: User | null) {
     calendarTasks: CalendarTask[],
     customization?: Customization
   ) => {
-    if (!user || syncLock.current) return;
+    if (!user || !isCloudConfigured || syncLock.current) return;
     syncLock.current = true;
     setSyncing(true);
 
