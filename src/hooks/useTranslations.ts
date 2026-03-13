@@ -807,6 +807,23 @@ const translations: Record<Language, Record<string, string>> = {
     permanentlyDelete: 'Eliminar permanentemente',
     trashAutoClean: '{count} nota(s) expirada(s) eliminada(s) de la papelera',
     trashAutoCleanInfo: 'Las notas en la papelera se eliminan automáticamente después de 30 días',
+
+    // Account
+    account: 'Cuenta',
+    accountDesc: 'Gestiona tu perfil y seguridad',
+    profile: 'Perfil',
+    email: 'Correo',
+    changeAccountPassword: 'Cambiar contraseña de la cuenta',
+    currentPassword: 'Contraseña actual',
+    newAccountPassword: 'Nueva contraseña',
+    confirmAccountPassword: 'Confirmar nueva contraseña',
+    updateAccountPassword: 'Actualizar contraseña',
+    passwordUpdated: '¡Contraseña actualizada con éxito!',
+    passwordError: 'Error al actualizar contraseña',
+    profileUpdated: '¡Perfil actualizado!',
+    profileError: 'Error al actualizar perfil',
+    updateProfile: 'Actualizar perfil',
+    notLoggedIn: 'Inicia sesión para gestionar tu cuenta',
   },
 };
 
