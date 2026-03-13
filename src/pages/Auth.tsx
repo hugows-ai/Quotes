@@ -150,7 +150,7 @@ export default function Auth() {
         </form>
 
         {view !== 'forgot' && (
-          <div className="text-center space-y-3">
+          <div className="text-center">
             <button
               type="button"
               onClick={() => setView(view === 'login' ? 'signup' : 'login')}
@@ -158,17 +158,6 @@ export default function Auth() {
             >
               {view === 'login' ? t('noAccount') : t('hasAccount')}
             </button>
-            <div>
-              <button
-                type="button"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('skip-auth'));
-                }}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {t('continueWithoutAccount')}
-              </button>
-            </div>
           </div>
         )}
 

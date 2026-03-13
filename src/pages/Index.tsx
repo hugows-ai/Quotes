@@ -8,17 +8,7 @@ import Auth from './Auth';
 const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(!isOnboardingComplete());
   const [isLoading, setIsLoading] = useState(true);
-  const [skipAuth, setSkipAuth] = useState(() => localStorage.getItem('quotes-skip-auth') === 'true');
   const { user, loading: authLoading, signOut } = useAuth();
-
-  useEffect(() => {
-    const handler = () => {
-      localStorage.setItem('quotes-skip-auth', 'true');
-      setSkipAuth(true);
-    };
-    window.addEventListener('skip-auth', handler);
-    return () => window.removeEventListener('skip-auth', handler);
-  }, []);
 
   const handleLoadingFinished = useCallback(() => {
     setIsLoading(false);
@@ -26,23 +16,21 @@ const Index = () => {
 
   const handleSignOut = useCallback(async () => {
     await signOut();
-    localStorage.removeItem('quotes-skip-auth');
-    setSkipAuth(false);
   }, [signOut]);
 
   if (showOnboarding) {
     return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
   }
 
-  // Show auth if not logged in and didn't skip
-  if (!authLoading && !user && !skipAuth) {
+  // Always show auth screen if not logged in
+  if (!authLoading && !user) {
     return <Auth />;
   }
 
   return (
     <>
       {isLoading && <LoadingScreen onFinished={handleLoadingFinished} />}
-      <NotesApp onSignOut={user ? handleSignOut : undefined} />
+      <NotesApp onSignOut={handleSignOut} />
     </>
   );
 };
