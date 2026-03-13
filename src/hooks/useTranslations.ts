@@ -283,6 +283,23 @@ const translations: Record<Language, Record<string, string>> = {
     permanentlyDelete: 'Excluir permanentemente',
     trashAutoClean: '{count} nota(s) expirada(s) removida(s) da lixeira',
     trashAutoCleanInfo: 'Notas na lixeira são excluídas automaticamente após 30 dias',
+
+    // Account
+    account: 'Conta',
+    accountDesc: 'Gerencie seu perfil e segurança',
+    profile: 'Perfil',
+    email: 'Email',
+    changeAccountPassword: 'Alterar senha da conta',
+    currentPassword: 'Senha atual',
+    newAccountPassword: 'Nova senha',
+    confirmAccountPassword: 'Confirmar nova senha',
+    updateAccountPassword: 'Atualizar senha',
+    passwordUpdated: 'Senha atualizada com sucesso!',
+    passwordError: 'Erro ao atualizar senha',
+    profileUpdated: 'Perfil atualizado!',
+    profileError: 'Erro ao atualizar perfil',
+    updateProfile: 'Atualizar perfil',
+    notLoggedIn: 'Faça login para gerenciar sua conta',
   },
 
   'en': {
@@ -528,6 +545,23 @@ const translations: Record<Language, Record<string, string>> = {
     permanentlyDelete: 'Delete permanently',
     trashAutoClean: '{count} expired note(s) removed from trash',
     trashAutoCleanInfo: 'Notes in trash are automatically deleted after 30 days',
+
+    // Account
+    account: 'Account',
+    accountDesc: 'Manage your profile and security',
+    profile: 'Profile',
+    email: 'Email',
+    changeAccountPassword: 'Change account password',
+    currentPassword: 'Current password',
+    newAccountPassword: 'New password',
+    confirmAccountPassword: 'Confirm new password',
+    updateAccountPassword: 'Update password',
+    passwordUpdated: 'Password updated successfully!',
+    passwordError: 'Error updating password',
+    profileUpdated: 'Profile updated!',
+    profileError: 'Error updating profile',
+    updateProfile: 'Update profile',
+    notLoggedIn: 'Sign in to manage your account',
   },
 
   'es': {
@@ -773,6 +807,23 @@ const translations: Record<Language, Record<string, string>> = {
     permanentlyDelete: 'Eliminar permanentemente',
     trashAutoClean: '{count} nota(s) expirada(s) eliminada(s) de la papelera',
     trashAutoCleanInfo: 'Las notas en la papelera se eliminan automáticamente después de 30 días',
+
+    // Account
+    account: 'Cuenta',
+    accountDesc: 'Gestiona tu perfil y seguridad',
+    profile: 'Perfil',
+    email: 'Correo',
+    changeAccountPassword: 'Cambiar contraseña de la cuenta',
+    currentPassword: 'Contraseña actual',
+    newAccountPassword: 'Nueva contraseña',
+    confirmAccountPassword: 'Confirmar nueva contraseña',
+    updateAccountPassword: 'Actualizar contraseña',
+    passwordUpdated: '¡Contraseña actualizada con éxito!',
+    passwordError: 'Error al actualizar contraseña',
+    profileUpdated: '¡Perfil actualizado!',
+    profileError: 'Error al actualizar perfil',
+    updateProfile: 'Actualizar perfil',
+    notLoggedIn: 'Inicia sesión para gestionar tu cuenta',
   },
 };
 

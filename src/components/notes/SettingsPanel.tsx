@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, FolderOpen, HardDrive, Globe, Download, Smartphone } from 'lucide-react';
+import { Settings, Save, FolderOpen, HardDrive, Globe, Download, Smartphone, User, KeyRound } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -55,6 +58,58 @@ const SETTINGS_KEY = 'notes-app-settings';
 export function SettingsPanel() {
   const { t, language, setLanguage } = useTranslations();
   const { isInstallable, isInstalled, install } = usePWAInstall();
+  const { user } = useAuth();
+
+  const [displayName, setDisplayName] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+
+  useEffect(() => {
+    if (user?.user_metadata?.display_name) {
+      setDisplayName(user.user_metadata.display_name);
+    }
+  }, [user]);
+
+  const handleUpdateProfile = async () => {
+    if (!displayName.trim()) return;
+    setUpdatingProfile(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { display_name: displayName.trim() },
+      });
+      if (error) throw error;
+      toast.success(t('profileUpdated'));
+    } catch (err: any) {
+      toast.error(err.message || t('profileError'));
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (newPassword.length < 6) {
+      toast.error(t('passwordMinLengthAccount'));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error(t('passwordMismatch'));
+      return;
+    }
+    setUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast.success(t('passwordUpdated'));
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      toast.error(err.message || t('passwordError'));
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     const stored = localStorage.getItem(SETTINGS_KEY);
@@ -165,8 +220,62 @@ export function SettingsPanel() {
         </SheetHeader>
         
         <ScrollArea className="h-[calc(100vh-120px)] pr-4 mt-6">
-          <Accordion type="multiple" defaultValue={['saving', 'storage', 'backup', 'language', 'install', 'download']} className="space-y-2">
+          <Accordion type="multiple" defaultValue={['account', 'saving', 'storage', 'backup', 'language', 'install', 'download']} className="space-y-2">
             
+            {/* Account Section */}
+            {user && (
+              <AccordionItem value="account" className="border rounded-lg px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span>{t('account')}</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-4">
+                  {/* Profile */}
+                  <div className="space-y-2">
+                    <Label>{t('email')}</Label>
+                    <Input value={user.email || ''} disabled className="opacity-70" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('displayName')}</Label>
+                    <Input
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder={t('displayNamePlaceholder')}
+                    />
+                    <Button size="sm" onClick={handleUpdateProfile} disabled={updatingProfile} className="w-full">
+                      {updatingProfile ? '...' : t('updateProfile')}
+                    </Button>
+                  </div>
+
+                  {/* Change Password */}
+                  <div className="pt-2 border-t border-border space-y-2">
+                    <div className="flex items-center gap-2">
+                      <KeyRound className="h-4 w-4" />
+                      <Label>{t('changeAccountPassword')}</Label>
+                    </div>
+                    <Input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder={t('newAccountPassword')}
+                    />
+                    <Input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder={t('confirmAccountPassword')}
+                    />
+                    <p className="text-xs text-muted-foreground">{t('passwordMinLengthAccount')}</p>
+                    <Button size="sm" onClick={handleUpdatePassword} disabled={updatingPassword} className="w-full">
+                      {updatingPassword ? '...' : t('updateAccountPassword')}
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
             {/* Language Section */}
             <AccordionItem value="language" className="border rounded-lg px-4">
               <AccordionTrigger className="hover:no-underline">
