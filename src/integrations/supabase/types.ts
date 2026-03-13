@@ -14,7 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      calendar_tasks: {
+        Row: {
+          completed: boolean
+          created_at: string
+          date: string
+          id: string
+          reminder_notified: boolean | null
+          reminder_time: string | null
+          text: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          date: string
+          id: string
+          reminder_notified?: boolean | null
+          reminder_time?: string | null
+          text?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          reminder_notified?: boolean | null
+          reminder_time?: string | null
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      folders: {
+        Row: {
+          color: string
+          id: string
+          name: string
+          parent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          id: string
+          name: string
+          parent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          content: string
+          created_at: string
+          drawing_data: string | null
+          folder_id: string | null
+          id: string
+          linked_date: string | null
+          password: string | null
+          tags: string[] | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+          workflow_data: string | null
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          drawing_data?: string | null
+          folder_id?: string | null
+          id: string
+          linked_date?: string | null
+          password?: string | null
+          tags?: string[] | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id: string
+          workflow_data?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          drawing_data?: string | null
+          folder_id?: string | null
+          id?: string
+          linked_date?: string | null
+          password?: string | null
+          tags?: string[] | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+          workflow_data?: string | null
+        }
+        Relationships: []
+      }
+      todos: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          note_id: string | null
+          text: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id: string
+          note_id?: string | null
+          text?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          note_id?: string | null
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_customizations: {
+        Row: {
+          customization_data: Json | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          customization_data?: Json | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          customization_data?: Json | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

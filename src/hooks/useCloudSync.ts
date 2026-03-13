@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { supabase, isCloudConfigured } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { Note, Folder, Todo, CalendarTask } from '@/types/notes';
 import { User } from '@supabase/supabase-js';
 import { Customization } from './useCustomization';
@@ -16,7 +16,7 @@ export function useCloudSync(user: User | null) {
     calendarTasks: CalendarTask[];
     customization?: Customization | null;
   } | null> => {
-    if (!user || !isCloudConfigured) return null;
+    if (!user) return null;
 
     try {
       const [notesRes, foldersRes, todosRes, tasksRes, customRes] = await Promise.all([
@@ -33,14 +33,14 @@ export function useCloudSync(user: User | null) {
       if (tasksRes.error) throw tasksRes.error;
 
       let customization: Customization | null = null;
-      if (!customRes.error && customRes.data?.customization_data) {
+      if (!customRes.error && customRes.data && customRes.data.customization_data) {
         try {
           customization = customRes.data.customization_data as unknown as Customization;
         } catch {}
       }
 
       return {
-        notes: (notesRes.data || []).map(n => ({
+        notes: (notesRes.data || []).map((n: any) => ({
           id: n.id,
           title: n.title,
           content: n.content,
@@ -54,20 +54,20 @@ export function useCloudSync(user: User | null) {
           workflowData: n.workflow_data || undefined,
           password: n.password || undefined,
         })),
-        folders: (foldersRes.data || []).map(f => ({
+        folders: (foldersRes.data || []).map((f: any) => ({
           id: f.id,
           name: f.name,
           color: f.color,
           parentId: f.parent_id,
         })),
-        todos: (todosRes.data || []).map(t => ({
+        todos: (todosRes.data || []).map((t: any) => ({
           id: t.id,
           text: t.text,
           completed: t.completed,
           noteId: t.note_id,
           createdAt: new Date(t.created_at),
         })),
-        calendarTasks: (tasksRes.data || []).map(t => ({
+        calendarTasks: (tasksRes.data || []).map((t: any) => ({
           id: t.id,
           text: t.text,
           completed: t.completed,
@@ -91,20 +91,19 @@ export function useCloudSync(user: User | null) {
     calendarTasks: CalendarTask[],
     customization?: Customization
   ) => {
-    if (!user || !isCloudConfigured || syncLock.current) return;
+    if (!user || syncLock.current) return;
     syncLock.current = true;
     setSyncing(true);
 
     try {
-      // Delete existing data first, then insert fresh
       await Promise.all([
-        supabase.from('notes').delete().eq('user_id', user.id).select(),
-        supabase.from('folders').delete().eq('user_id', user.id).select(),
-        supabase.from('todos').delete().eq('user_id', user.id).select(),
-        supabase.from('calendar_tasks').delete().eq('user_id', user.id).select(),
+        supabase.from('notes').delete().eq('user_id', user.id),
+        supabase.from('folders').delete().eq('user_id', user.id),
+        supabase.from('todos').delete().eq('user_id', user.id),
+        supabase.from('calendar_tasks').delete().eq('user_id', user.id),
       ]);
 
-      const insertPromises: any[] = [];
+      const insertPromises: Promise<any>[] = [];
 
       if (notes.length > 0) {
         insertPromises.push(
@@ -124,7 +123,7 @@ export function useCloudSync(user: User | null) {
               workflow_data: n.workflowData || null,
               password: n.password || null,
             }))
-          ).select()
+          ) as any
         );
       }
 
@@ -138,7 +137,7 @@ export function useCloudSync(user: User | null) {
               color: f.color,
               parent_id: f.parentId,
             }))
-          ).select()
+          ) as any
         );
       }
 
@@ -153,7 +152,7 @@ export function useCloudSync(user: User | null) {
               note_id: t.noteId,
               created_at: t.createdAt.toISOString(),
             }))
-          ).select()
+          ) as any
         );
       }
 
@@ -170,25 +169,24 @@ export function useCloudSync(user: User | null) {
               reminder_time: t.reminderTime || null,
               reminder_notified: t.reminderNotified || false,
             }))
-          ).select()
+          ) as any
         );
       }
 
-      // Save customization
       if (customization) {
         insertPromises.push(
           supabase.from('user_customizations').upsert({
             user_id: user.id,
             customization_data: customization as any,
             updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' }).select()
+          }, { onConflict: 'user_id' }) as any
         );
       }
 
       const results = await Promise.all(insertPromises);
-      const errors = results.filter(r => r.error);
+      const errors = results.filter((r: any) => r.error);
       if (errors.length > 0) {
-        console.error('Cloud save errors:', errors.map(e => e.error));
+        console.error('Cloud save errors:', errors.map((e: any) => e.error));
       } else {
         setLastSynced(new Date());
       }
