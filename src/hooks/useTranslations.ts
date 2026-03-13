@@ -545,6 +545,23 @@ const translations: Record<Language, Record<string, string>> = {
     permanentlyDelete: 'Delete permanently',
     trashAutoClean: '{count} expired note(s) removed from trash',
     trashAutoCleanInfo: 'Notes in trash are automatically deleted after 30 days',
+
+    // Account
+    account: 'Account',
+    accountDesc: 'Manage your profile and security',
+    profile: 'Profile',
+    email: 'Email',
+    changeAccountPassword: 'Change account password',
+    currentPassword: 'Current password',
+    newAccountPassword: 'New password',
+    confirmAccountPassword: 'Confirm new password',
+    updateAccountPassword: 'Update password',
+    passwordUpdated: 'Password updated successfully!',
+    passwordError: 'Error updating password',
+    profileUpdated: 'Profile updated!',
+    profileError: 'Error updating profile',
+    updateProfile: 'Update profile',
+    notLoggedIn: 'Sign in to manage your account',
   },
 
   'es': {
