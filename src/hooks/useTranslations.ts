@@ -283,6 +283,23 @@ const translations: Record<Language, Record<string, string>> = {
     permanentlyDelete: 'Excluir permanentemente',
     trashAutoClean: '{count} nota(s) expirada(s) removida(s) da lixeira',
     trashAutoCleanInfo: 'Notas na lixeira são excluídas automaticamente após 30 dias',
+
+    // Account
+    account: 'Conta',
+    accountDesc: 'Gerencie seu perfil e segurança',
+    profile: 'Perfil',
+    email: 'Email',
+    changeAccountPassword: 'Alterar senha da conta',
+    currentPassword: 'Senha atual',
+    newAccountPassword: 'Nova senha',
+    confirmAccountPassword: 'Confirmar nova senha',
+    updateAccountPassword: 'Atualizar senha',
+    passwordUpdated: 'Senha atualizada com sucesso!',
+    passwordError: 'Erro ao atualizar senha',
+    profileUpdated: 'Perfil atualizado!',
+    profileError: 'Erro ao atualizar perfil',
+    updateProfile: 'Atualizar perfil',
+    notLoggedIn: 'Faça login para gerenciar sua conta',
   },
 
   'en': {
