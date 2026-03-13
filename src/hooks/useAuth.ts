@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase, isCloudConfigured } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 
 export function useAuth() {
@@ -8,13 +8,6 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isCloudConfigured) {
-      setSession(null);
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
@@ -33,7 +26,6 @@ export function useAuth() {
   }, []);
 
   const signOut = useCallback(async () => {
-    if (!isCloudConfigured) return;
     await supabase.auth.signOut();
   }, []);
 
