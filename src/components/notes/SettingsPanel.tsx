@@ -57,6 +57,58 @@ const SETTINGS_KEY = 'notes-app-settings';
 export function SettingsPanel() {
   const { t, language, setLanguage } = useTranslations();
   const { isInstallable, isInstalled, install } = usePWAInstall();
+  const { user } = useAuth();
+
+  const [displayName, setDisplayName] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+
+  useEffect(() => {
+    if (user?.user_metadata?.display_name) {
+      setDisplayName(user.user_metadata.display_name);
+    }
+  }, [user]);
+
+  const handleUpdateProfile = async () => {
+    if (!displayName.trim()) return;
+    setUpdatingProfile(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { display_name: displayName.trim() },
+      });
+      if (error) throw error;
+      toast.success(t('profileUpdated'));
+    } catch (err: any) {
+      toast.error(err.message || t('profileError'));
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (newPassword.length < 6) {
+      toast.error(t('passwordMinLengthAccount'));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error(t('passwordMismatch'));
+      return;
+    }
+    setUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast.success(t('passwordUpdated'));
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      toast.error(err.message || t('passwordError'));
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     const stored = localStorage.getItem(SETTINGS_KEY);
