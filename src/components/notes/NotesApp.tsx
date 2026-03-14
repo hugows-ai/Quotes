@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 
 interface NotesAppProps {
   onSignOut?: () => void;
+  isGuest?: boolean;
 }
 
 export function NotesApp({ onSignOut }: NotesAppProps) {
