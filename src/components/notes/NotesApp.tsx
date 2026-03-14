@@ -23,9 +23,10 @@ import { toast } from 'sonner';
 
 interface NotesAppProps {
   onSignOut?: () => void;
+  isGuest?: boolean;
 }
 
-export function NotesApp({ onSignOut }: NotesAppProps) {
+export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   const {
     notes, allNotes, folders, todos, calendarTasks,
     selectedNote, selectedNoteId, searchQuery,
