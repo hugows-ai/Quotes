@@ -5,11 +5,15 @@ import { Input } from '@/components/ui/input';
 import { useTranslations } from '@/hooks/useTranslations';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { toast } from 'sonner';
-import { LogIn, UserPlus, KeyRound, ArrowLeft, FileText, Download } from 'lucide-react';
+import { LogIn, UserPlus, KeyRound, ArrowLeft, FileText, Download, Monitor } from 'lucide-react';
 
 type AuthView = 'login' | 'signup' | 'forgot';
 
-export default function Auth() {
+interface AuthProps {
+  onContinueAsGuest?: () => void;
+}
+
+export default function Auth({ onContinueAsGuest }: AuthProps) {
   const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -150,7 +154,7 @@ export default function Auth() {
         </form>
 
         {view !== 'forgot' && (
-          <div className="text-center">
+          <div className="text-center space-y-3">
             <button
               type="button"
               onClick={() => setView(view === 'login' ? 'signup' : 'login')}
@@ -158,6 +162,20 @@ export default function Auth() {
             >
               {view === 'login' ? t('noAccount') : t('hasAccount')}
             </button>
+
+            {/* Continue without account */}
+            {onContinueAsGuest && (
+              <div>
+                <button
+                  type="button"
+                  onClick={onContinueAsGuest}
+                  className="flex items-center gap-2 mx-auto text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Monitor className="h-4 w-4" />
+                  {t('continueWithoutAccount')}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
