@@ -60,6 +60,7 @@ export function SettingsPanel() {
   const { t, language, setLanguage } = useTranslations();
   const { isInstallable, isInstalled, install } = usePWAInstall();
   const { user } = useAuth();
+  const { plan, subscribed, subscriptionEnd, loading: subLoading, checkout, manageSubscription } = useSubscription();
 
   const [displayName, setDisplayName] = useState('');
   const [newPassword, setNewPassword] = useState('');
