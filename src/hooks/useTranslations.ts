@@ -300,6 +300,17 @@ const translations: Record<Language, Record<string, string>> = {
     profileError: 'Erro ao atualizar perfil',
     updateProfile: 'Atualizar perfil',
     notLoggedIn: 'Faça login para gerenciar sua conta',
+    // Subscription
+    subscription: 'Assinatura',
+    currentPlan: 'Plano atual',
+    renewsOn: 'Renova em',
+    month: 'mês',
+    unlimitedNotes: 'Notas ilimitadas',
+    unlimitedAI: 'IA ilimitada',
+    fullCloudSync: 'Sincronização completa na nuvem',
+    collaboration: 'Colaboração',
+    upgradeToPro: 'Assinar Pro',
+    manageSubscription: 'Gerenciar assinatura',
   },
 
   'en': {
@@ -562,6 +573,17 @@ const translations: Record<Language, Record<string, string>> = {
     profileError: 'Error updating profile',
     updateProfile: 'Update profile',
     notLoggedIn: 'Sign in to manage your account',
+    // Subscription
+    subscription: 'Subscription',
+    currentPlan: 'Current plan',
+    renewsOn: 'Renews on',
+    month: 'month',
+    unlimitedNotes: 'Unlimited notes',
+    unlimitedAI: 'Unlimited AI',
+    fullCloudSync: 'Full cloud sync',
+    collaboration: 'Collaboration',
+    upgradeToPro: 'Upgrade to Pro',
+    manageSubscription: 'Manage subscription',
   },
 
   'es': {
@@ -824,6 +846,17 @@ const translations: Record<Language, Record<string, string>> = {
     profileError: 'Error al actualizar perfil',
     updateProfile: 'Actualizar perfil',
     notLoggedIn: 'Inicia sesión para gestionar tu cuenta',
+    // Subscription
+    subscription: 'Suscripción',
+    currentPlan: 'Plan actual',
+    renewsOn: 'Se renueva el',
+    month: 'mes',
+    unlimitedNotes: 'Notas ilimitadas',
+    unlimitedAI: 'IA ilimitada',
+    fullCloudSync: 'Sincronización completa en la nube',
+    collaboration: 'Colaboración',
+    upgradeToPro: 'Actualizar a Pro',
+    manageSubscription: 'Gestionar suscripción',
   },
 };
 
