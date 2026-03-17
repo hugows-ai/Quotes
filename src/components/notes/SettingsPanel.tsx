@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, FolderOpen, HardDrive, Globe, Download, Smartphone, User, KeyRound } from 'lucide-react';
+import { Settings, Save, FolderOpen, HardDrive, Globe, Download, Smartphone, User, KeyRound, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription, PLANS } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
