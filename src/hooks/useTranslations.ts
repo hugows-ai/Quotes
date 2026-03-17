@@ -573,6 +573,17 @@ const translations: Record<Language, Record<string, string>> = {
     profileError: 'Error updating profile',
     updateProfile: 'Update profile',
     notLoggedIn: 'Sign in to manage your account',
+    // Subscription
+    subscription: 'Subscription',
+    currentPlan: 'Current plan',
+    renewsOn: 'Renews on',
+    month: 'month',
+    unlimitedNotes: 'Unlimited notes',
+    unlimitedAI: 'Unlimited AI',
+    fullCloudSync: 'Full cloud sync',
+    collaboration: 'Collaboration',
+    upgradeToPro: 'Upgrade to Pro',
+    manageSubscription: 'Manage subscription',
   },
 
   'es': {
