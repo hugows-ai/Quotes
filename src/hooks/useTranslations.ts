@@ -846,6 +846,17 @@ const translations: Record<Language, Record<string, string>> = {
     profileError: 'Error al actualizar perfil',
     updateProfile: 'Actualizar perfil',
     notLoggedIn: 'Inicia sesión para gestionar tu cuenta',
+    // Subscription
+    subscription: 'Suscripción',
+    currentPlan: 'Plan actual',
+    renewsOn: 'Se renueva el',
+    month: 'mes',
+    unlimitedNotes: 'Notas ilimitadas',
+    unlimitedAI: 'IA ilimitada',
+    fullCloudSync: 'Sincronización completa en la nube',
+    collaboration: 'Colaboración',
+    upgradeToPro: 'Actualizar a Pro',
+    manageSubscription: 'Gestionar suscripción',
   },
 };
 
