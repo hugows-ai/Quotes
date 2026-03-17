@@ -278,6 +278,64 @@ export function SettingsPanel() {
               </AccordionItem>
             )}
 
+            {/* Subscription Section */}
+            {user && (
+              <AccordionItem value="subscription" className="border rounded-lg px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    <span>{t('subscription')}</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-4">
+                  <div className="p-3 rounded-lg border border-border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">{t('currentPlan')}</span>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${plan === 'pro' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                        {plan === 'pro' ? 'Pro' : 'Free'}
+                      </span>
+                    </div>
+                    {subscriptionEnd && (
+                      <p className="text-xs text-muted-foreground">
+                        {t('renewsOn')}: {new Date(subscriptionEnd).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+
+                  {plan === 'free' ? (
+                    <div className="space-y-3">
+                      <div className="p-3 bg-muted rounded-lg space-y-1">
+                        <p className="text-sm font-medium">Pro — $9.90/{t('month')}</p>
+                        <ul className="text-xs text-muted-foreground space-y-0.5">
+                          <li>✓ {t('unlimitedNotes')}</li>
+                          <li>✓ {t('unlimitedAI')}</li>
+                          <li>✓ {t('fullCloudSync')}</li>
+                          <li>✓ {t('collaboration')}</li>
+                        </ul>
+                      </div>
+                      <Button
+                        className="w-full gap-2"
+                        onClick={() => checkout(PLANS.pro.price_id)}
+                        disabled={subLoading}
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        {t('upgradeToPro')}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={manageSubscription}
+                      disabled={subLoading}
+                    >
+                      {t('manageSubscription')}
+                    </Button>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
             {/* Language Section */}
             <AccordionItem value="language" className="border rounded-lg px-4">
               <AccordionTrigger className="hover:no-underline">
