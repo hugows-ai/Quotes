@@ -5,6 +5,8 @@ import { EmptyState } from './EmptyState';
 import { FocusMode } from './FocusMode';
 import { AdvancedSearch } from './AdvancedSearch';
 import { UnlockDialog } from './PasswordDialog';
+import { CommandPalette } from './CommandPalette';
+import { TemplateLibrary } from './TemplateLibrary';
 import { useNotes } from '@/hooks/useNotes';
 import { useTheme } from '@/hooks/useTheme';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
@@ -50,6 +52,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   const [focusMode, setFocusMode] = useState(false);
   const [focusTimerState, setFocusTimerState] = useState<{ time: number; isRunning: boolean; isBreak: boolean } | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [unlockNoteId, setUnlockNoteId] = useState<string | null>(null);
   const [showTrash, setShowTrash] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -263,6 +266,12 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     createNote(type, folderId);
   };
 
+  const handleUseTemplate = useCallback((title: string, content: string) => {
+    const note = createNote('text', null);
+    updateNote(note.id, { title, content });
+    toast.success(t('saved'));
+  }, [createNote, updateNote, t]);
+
   const handleRenameNote = useCallback((noteId: string, newTitle: string) => {
     updateNote(noteId, { title: newTitle });
   }, [updateNote]);
@@ -459,6 +468,26 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
           onClose={() => setShowAdvancedSearch(false)}
         />
       )}
+
+      {/* Command Palette (Ctrl+K) */}
+      <CommandPalette
+        notes={allNotes}
+        folders={folders}
+        todos={todos}
+        onSelectNote={handleSelectNote}
+        onCreateNote={(type) => createNote(type)}
+        onOpenAdvancedSearch={() => setShowAdvancedSearch(true)}
+        onOpenTemplates={() => setShowTemplates(true)}
+      />
+
+      {/* Template Library */}
+      <TemplateLibrary
+        open={showTemplates}
+        onClose={() => setShowTemplates(false)}
+        onUseTemplate={handleUseTemplate}
+        currentNoteTitle={selectedNote?.title}
+        currentNoteContent={selectedNote?.content}
+      />
 
       {/* Unlock Dialog */}
       <UnlockDialog
