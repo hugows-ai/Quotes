@@ -469,6 +469,26 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
         />
       )}
 
+      {/* Command Palette (Ctrl+K) */}
+      <CommandPalette
+        notes={allNotes}
+        folders={folders}
+        todos={todos}
+        onSelectNote={handleSelectNote}
+        onCreateNote={(type) => createNote(type)}
+        onOpenAdvancedSearch={() => setShowAdvancedSearch(true)}
+        onOpenTemplates={() => setShowTemplates(true)}
+      />
+
+      {/* Template Library */}
+      <TemplateLibrary
+        open={showTemplates}
+        onClose={() => setShowTemplates(false)}
+        onUseTemplate={handleUseTemplate}
+        currentNoteTitle={selectedNote?.title}
+        currentNoteContent={selectedNote?.content}
+      />
+
       {/* Unlock Dialog */}
       <UnlockDialog
         open={!!unlockNoteId}
