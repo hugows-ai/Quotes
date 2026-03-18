@@ -159,7 +159,7 @@ export default function Admin() {
                 ].map(item => (
                   <div key={item.label} className="flex items-center justify-between py-1.5 text-sm">
                     <span>{item.label}</span>
-                    <Badge variant="default" className="bg-emerald-500/10 text-emerald-600 border-emerald-200">
+                    <Badge variant="default" className="bg-success/10 text-success border-success/20">
                       ✓ {item.status}
                     </Badge>
                   </div>
