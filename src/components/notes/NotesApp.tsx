@@ -5,6 +5,8 @@ import { EmptyState } from './EmptyState';
 import { FocusMode } from './FocusMode';
 import { AdvancedSearch } from './AdvancedSearch';
 import { UnlockDialog } from './PasswordDialog';
+import { CommandPalette } from './CommandPalette';
+import { TemplateLibrary } from './TemplateLibrary';
 import { useNotes } from '@/hooks/useNotes';
 import { useTheme } from '@/hooks/useTheme';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
