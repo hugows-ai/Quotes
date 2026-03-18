@@ -266,6 +266,12 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     createNote(type, folderId);
   };
 
+  const handleUseTemplate = useCallback((title: string, content: string) => {
+    const note = createNote('text', null);
+    updateNote(note.id, { title, content });
+    toast.success(t('saved'));
+  }, [createNote, updateNote, t]);
+
   const handleRenameNote = useCallback((noteId: string, newTitle: string) => {
     updateNote(noteId, { title: newTitle });
   }, [updateNote]);
