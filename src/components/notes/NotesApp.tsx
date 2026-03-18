@@ -52,6 +52,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   const [focusMode, setFocusMode] = useState(false);
   const [focusTimerState, setFocusTimerState] = useState<{ time: number; isRunning: boolean; isBreak: boolean } | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [unlockNoteId, setUnlockNoteId] = useState<string | null>(null);
   const [showTrash, setShowTrash] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
