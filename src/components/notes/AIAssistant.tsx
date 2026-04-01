@@ -155,6 +155,11 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
         <div className="flex items-center gap-2">
           <Bot className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold">{t('aiAssistant')}</span>
+          {aiDailyLimit != null && (
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${canUseAi ? 'bg-muted text-muted-foreground' : 'bg-destructive/20 text-destructive'}`}>
+              {aiUsesToday}/{aiDailyLimit}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setMessages([])} title={t('aiClear')}>
