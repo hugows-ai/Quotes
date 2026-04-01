@@ -127,17 +127,21 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
           }
         }
       }
+
+      // Track AI usage after successful response
+      if (assistantSoFar) {
+        trackAiUsage('assistant');
+      }
     } catch (e: any) {
       console.error('AI error:', e);
       toast.error(e.message || 'Erro ao consultar o assistente');
-      // Remove user message if no response
       if (!assistantSoFar) {
         setMessages(prev => prev.slice(0, -1));
       }
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, noteTitle, noteContent]);
+  }, [messages, isLoading, noteTitle, noteContent, canUseAi, plan, aiUsesToday, aiDailyLimit, trackAiUsage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
