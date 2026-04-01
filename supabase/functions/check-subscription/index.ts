@@ -43,6 +43,18 @@ serve(async (req) => {
 
     if (customers.data.length === 0) {
       logStep("No customer found");
+      // Persist free status
+      await supabaseClient.from('user_subscriptions').upsert({
+        user_id: user.id,
+        plan: 'free',
+        status: 'inactive',
+        stripe_customer_id: null,
+        stripe_subscription_id: null,
+        stripe_price_id: null,
+        stripe_product_id: null,
+        current_period_end: null,
+      }, { onConflict: 'user_id' });
+
       return new Response(JSON.stringify({ subscribed: false, plan: 'free' }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -59,13 +71,35 @@ serve(async (req) => {
     const hasActiveSub = subscriptions.data.length > 0;
     let plan = 'free';
     let subscriptionEnd = null;
+    let priceId = null;
+    let productId = null;
+    let subscriptionId = null;
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      subscriptionId = subscription.id;
+      priceId = subscription.items.data[0]?.price?.id || null;
+      productId = subscription.items.data[0]?.price?.product || null;
       plan = 'pro';
       logStep("Active subscription found", { plan, endDate: subscriptionEnd });
     }
+
+    // Persist subscription state in database
+    await supabaseClient.from('user_subscriptions').upsert({
+      user_id: user.id,
+      plan,
+      status: hasActiveSub ? 'active' : 'inactive',
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscriptionId,
+      stripe_price_id: priceId,
+      stripe_product_id: productId,
+      current_period_end: subscriptionEnd,
+      ai_daily_limit: plan === 'pro' ? 999999 : 5,
+      storage_limit_bytes: plan === 'pro' ? 0 : 524288000,
+    }, { onConflict: 'user_id' });
+
+    logStep("Subscription persisted to DB");
 
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,

@@ -3,7 +3,8 @@ import {
   Plus, Search, FolderOpen, FileText, Calendar as CalendarIcon,
   CheckSquare, Moon, Sun, ChevronDown, ChevronRight, Trash2, X,
   Pencil, GitBranch, FolderPlus, Edit3, Palette, FolderMinus,
-  PanelLeftClose, PanelLeftOpen, FolderInput, Copy, LogOut, Upload
+  PanelLeftClose, PanelLeftOpen, FolderInput, Copy, LogOut, Upload,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,6 +64,7 @@ interface SidebarProps {
   onImportNotes?: () => void;
   trashedNotes?: Note[];
   onShowTrash?: () => void;
+  onOpenTemplates?: () => void;
 }
 
 const FOLDER_COLORS = [
@@ -76,7 +78,7 @@ export function Sidebar({
   onCreateFolder, onUpdateFolder, onDeleteFolder, onAddCalendarTask,
   onToggleCalendarTask, onDeleteCalendarTask, getCalendarTasksForDate,
   allNotes, collapsed, onToggleCollapse, onMoveNote, onOpenAdvancedSearch,
-  onRenameNote, onSignOut, onImportNotes, trashedNotes, onShowTrash,
+  onRenameNote, onSignOut, onImportNotes, trashedNotes, onShowTrash, onOpenTemplates,
 }: SidebarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [notesOpen, setNotesOpen] = useState(true);
@@ -453,6 +455,16 @@ export function Sidebar({
                   </div>
                 </CollapsibleContent>
               </Collapsible>
+
+              {/* Templates Shortcut */}
+              {onOpenTemplates && (
+                <div className="pt-1">
+                  <Button variant="ghost" size="sm" className="w-full gap-2 justify-start text-sidebar-foreground" onClick={onOpenTemplates}>
+                    <BookOpen className="h-4 w-4" />
+                    <span className="text-sm">{t('templates') || 'Templates'}</span>
+                  </Button>
+                </div>
+              )}
 
               {/* Customization Panel */}
               <div className="pt-2 border-t border-sidebar-border">

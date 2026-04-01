@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, X, Loader2, Sparkles, Eraser } from 'lucide-react';
+import { Bot, Send, X, Loader2, Sparkles, Eraser, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownPreview } from './MarkdownPreview';
 import { useTranslations } from '@/hooks/useTranslations';
+import { useUsageLimits } from '@/hooks/useUsageLimits';
 import { toast } from 'sonner';
 
 interface Message {
@@ -28,6 +29,7 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslations();
+  const { canUseAi, aiUsesToday, aiDailyLimit, plan, trackAiUsage } = useUsageLimits();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -48,6 +50,13 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
 
   const sendMessage = useCallback(async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
+
+    if (!canUseAi) {
+      toast.error(plan === 'free' 
+        ? `AI limit reached (${aiUsesToday}/${aiDailyLimit} today). Upgrade to Pro for unlimited access.`
+        : 'AI is currently unavailable.');
+      return;
+    }
 
     const userMsg: Message = { role: 'user', content: messageText };
     const allMessages = [...messages, userMsg];
@@ -118,17 +127,21 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
           }
         }
       }
+
+      // Track AI usage after successful response
+      if (assistantSoFar) {
+        trackAiUsage('assistant');
+      }
     } catch (e: any) {
       console.error('AI error:', e);
       toast.error(e.message || 'Erro ao consultar o assistente');
-      // Remove user message if no response
       if (!assistantSoFar) {
         setMessages(prev => prev.slice(0, -1));
       }
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, noteTitle, noteContent]);
+  }, [messages, isLoading, noteTitle, noteContent, canUseAi, plan, aiUsesToday, aiDailyLimit, trackAiUsage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,6 +155,11 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
         <div className="flex items-center gap-2">
           <Bot className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold">{t('aiAssistant')}</span>
+          {aiDailyLimit != null && (
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${canUseAi ? 'bg-muted text-muted-foreground' : 'bg-destructive/20 text-destructive'}`}>
+              {aiUsesToday}/{aiDailyLimit}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setMessages([])} title={t('aiClear')}>

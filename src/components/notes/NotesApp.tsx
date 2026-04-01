@@ -320,6 +320,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
                   onImportNotes={handleImportNotes}
                   trashedNotes={trashedNotes}
                   onShowTrash={() => setShowTrash(true)}
+                  onOpenTemplates={() => setShowTemplates(true)}
                 />
               </ResizablePanel>
               <ResizableHandle withHandle />
@@ -359,6 +360,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     onImportNotes: handleImportNotes,
     trashedNotes,
     onShowTrash: () => setShowTrash(true),
+    onOpenTemplates: () => setShowTemplates(true),
   };
 
   return (

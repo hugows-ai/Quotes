@@ -96,18 +96,39 @@ export function useCloudSync(user: User | null) {
     setSyncing(true);
 
     try {
-      await Promise.all([
-        supabase.from('notes').delete().eq('user_id', user.id),
-        supabase.from('folders').delete().eq('user_id', user.id),
-        supabase.from('todos').delete().eq('user_id', user.id),
-        supabase.from('calendar_tasks').delete().eq('user_id', user.id),
+      // Get current cloud IDs for each table to detect deletions
+      const [cloudNotes, cloudFolders, cloudTodos, cloudTasks] = await Promise.all([
+        supabase.from('notes').select('id').eq('user_id', user.id),
+        supabase.from('folders').select('id').eq('user_id', user.id),
+        supabase.from('todos').select('id').eq('user_id', user.id),
+        supabase.from('calendar_tasks').select('id').eq('user_id', user.id),
       ]);
 
-      const insertPromises: Promise<any>[] = [];
+      const localNoteIds = new Set(notes.map(n => n.id));
+      const localFolderIds = new Set(folders.map(f => f.id));
+      const localTodoIds = new Set(todos.map(t => t.id));
+      const localTaskIds = new Set(calendarTasks.map(t => t.id));
+
+      // Delete items removed locally
+      const deletePromises: Promise<any>[] = [];
+      const deletedNoteIds = (cloudNotes.data || []).filter(n => !localNoteIds.has(n.id)).map(n => n.id);
+      const deletedFolderIds = (cloudFolders.data || []).filter(f => !localFolderIds.has(f.id)).map(f => f.id);
+      const deletedTodoIds = (cloudTodos.data || []).filter(t => !localTodoIds.has(t.id)).map(t => t.id);
+      const deletedTaskIds = (cloudTasks.data || []).filter(t => !localTaskIds.has(t.id)).map(t => t.id);
+
+      if (deletedNoteIds.length > 0) deletePromises.push(supabase.from('notes').delete().in('id', deletedNoteIds).eq('user_id', user.id) as any);
+      if (deletedFolderIds.length > 0) deletePromises.push(supabase.from('folders').delete().in('id', deletedFolderIds).eq('user_id', user.id) as any);
+      if (deletedTodoIds.length > 0) deletePromises.push(supabase.from('todos').delete().in('id', deletedTodoIds).eq('user_id', user.id) as any);
+      if (deletedTaskIds.length > 0) deletePromises.push(supabase.from('calendar_tasks').delete().in('id', deletedTaskIds).eq('user_id', user.id) as any);
+
+      if (deletePromises.length > 0) await Promise.all(deletePromises);
+
+      // Upsert current data
+      const upsertPromises: Promise<any>[] = [];
 
       if (notes.length > 0) {
-        insertPromises.push(
-          supabase.from('notes').insert(
+        upsertPromises.push(
+          supabase.from('notes').upsert(
             notes.map(n => ({
               id: n.id,
               user_id: user.id,
@@ -122,28 +143,30 @@ export function useCloudSync(user: User | null) {
               drawing_data: n.drawingData || null,
               workflow_data: n.workflowData || null,
               password: n.password || null,
-            }))
+            })),
+            { onConflict: 'id' }
           ) as any
         );
       }
 
       if (folders.length > 0) {
-        insertPromises.push(
-          supabase.from('folders').insert(
+        upsertPromises.push(
+          supabase.from('folders').upsert(
             folders.map(f => ({
               id: f.id,
               user_id: user.id,
               name: f.name,
               color: f.color,
               parent_id: f.parentId,
-            }))
+            })),
+            { onConflict: 'id' }
           ) as any
         );
       }
 
       if (todos.length > 0) {
-        insertPromises.push(
-          supabase.from('todos').insert(
+        upsertPromises.push(
+          supabase.from('todos').upsert(
             todos.map(t => ({
               id: t.id,
               user_id: user.id,
@@ -151,14 +174,15 @@ export function useCloudSync(user: User | null) {
               completed: t.completed,
               note_id: t.noteId,
               created_at: t.createdAt.toISOString(),
-            }))
+            })),
+            { onConflict: 'id' }
           ) as any
         );
       }
 
       if (calendarTasks.length > 0) {
-        insertPromises.push(
-          supabase.from('calendar_tasks').insert(
+        upsertPromises.push(
+          supabase.from('calendar_tasks').upsert(
             calendarTasks.map(t => ({
               id: t.id,
               user_id: user.id,
@@ -168,13 +192,14 @@ export function useCloudSync(user: User | null) {
               created_at: t.createdAt.toISOString(),
               reminder_time: t.reminderTime || null,
               reminder_notified: t.reminderNotified || false,
-            }))
+            })),
+            { onConflict: 'id' }
           ) as any
         );
       }
 
       if (customization) {
-        insertPromises.push(
+        upsertPromises.push(
           supabase.from('user_customizations').upsert({
             user_id: user.id,
             customization_data: customization as any,
@@ -183,7 +208,7 @@ export function useCloudSync(user: User | null) {
         );
       }
 
-      const results = await Promise.all(insertPromises);
+      const results = await Promise.all(upsertPromises);
       const errors = results.filter((r: any) => r.error);
       if (errors.length > 0) {
         console.error('Cloud save errors:', errors.map((e: any) => e.error));
