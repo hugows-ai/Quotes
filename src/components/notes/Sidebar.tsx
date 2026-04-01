@@ -3,7 +3,8 @@ import {
   Plus, Search, FolderOpen, FileText, Calendar as CalendarIcon,
   CheckSquare, Moon, Sun, ChevronDown, ChevronRight, Trash2, X,
   Pencil, GitBranch, FolderPlus, Edit3, Palette, FolderMinus,
-  PanelLeftClose, PanelLeftOpen, FolderInput, Copy, LogOut, Upload
+  PanelLeftClose, PanelLeftOpen, FolderInput, Copy, LogOut, Upload,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
