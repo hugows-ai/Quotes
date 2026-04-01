@@ -78,7 +78,7 @@ export function Sidebar({
   onCreateFolder, onUpdateFolder, onDeleteFolder, onAddCalendarTask,
   onToggleCalendarTask, onDeleteCalendarTask, getCalendarTasksForDate,
   allNotes, collapsed, onToggleCollapse, onMoveNote, onOpenAdvancedSearch,
-  onRenameNote, onSignOut, onImportNotes, trashedNotes, onShowTrash,
+  onRenameNote, onSignOut, onImportNotes, trashedNotes, onShowTrash, onOpenTemplates,
 }: SidebarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [notesOpen, setNotesOpen] = useState(true);
