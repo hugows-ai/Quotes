@@ -29,6 +29,7 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslations();
+  const { canUseAi, aiUsesToday, aiDailyLimit, plan, trackAiUsage } = useUsageLimits();
 
   useEffect(() => {
     inputRef.current?.focus();
