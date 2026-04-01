@@ -51,6 +51,13 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
   const sendMessage = useCallback(async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
+    if (!canUseAi) {
+      toast.error(plan === 'free' 
+        ? `AI limit reached (${aiUsesToday}/${aiDailyLimit} today). Upgrade to Pro for unlimited access.`
+        : 'AI is currently unavailable.');
+      return;
+    }
+
     const userMsg: Message = { role: 'user', content: messageText };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
