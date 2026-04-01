@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, X, Loader2, Sparkles, Eraser } from 'lucide-react';
+import { Bot, Send, X, Loader2, Sparkles, Eraser, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownPreview } from './MarkdownPreview';
 import { useTranslations } from '@/hooks/useTranslations';
+import { useUsageLimits } from '@/hooks/useUsageLimits';
 import { toast } from 'sonner';
 
 interface Message {
