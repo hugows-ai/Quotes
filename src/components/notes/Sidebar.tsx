@@ -64,6 +64,7 @@ interface SidebarProps {
   onImportNotes?: () => void;
   trashedNotes?: Note[];
   onShowTrash?: () => void;
+  onOpenTemplates?: () => void;
 }
 
 const FOLDER_COLORS = [
