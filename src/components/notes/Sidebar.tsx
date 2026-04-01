@@ -456,6 +456,16 @@ export function Sidebar({
                 </CollapsibleContent>
               </Collapsible>
 
+              {/* Templates Shortcut */}
+              {onOpenTemplates && (
+                <div className="pt-1">
+                  <Button variant="ghost" size="sm" className="w-full gap-2 justify-start text-sidebar-foreground" onClick={onOpenTemplates}>
+                    <BookOpen className="h-4 w-4" />
+                    <span className="text-sm">{t('templates') || 'Templates'}</span>
+                  </Button>
+                </div>
+              )}
+
               {/* Customization Panel */}
               <div className="pt-2 border-t border-sidebar-border">
                 <CustomizationPanel />
