@@ -43,7 +43,6 @@ serve(async (req) => {
 
     if (customers.data.length === 0) {
       logStep("No customer found");
-      // Persist free status
       await supabaseClient.from('user_subscriptions').upsert({
         user_id: user.id,
         plan: 'free',
@@ -53,6 +52,8 @@ serve(async (req) => {
         stripe_price_id: null,
         stripe_product_id: null,
         current_period_end: null,
+        ai_daily_limit: 5,
+        storage_limit_bytes: 524288000,
       }, { onConflict: 'user_id' });
 
       return new Response(JSON.stringify({ subscribed: false, plan: 'free' }), {
@@ -62,6 +63,8 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
+    logStep("Found Stripe customer", { customerId });
+
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
@@ -70,23 +73,36 @@ serve(async (req) => {
 
     const hasActiveSub = subscriptions.data.length > 0;
     let plan = 'free';
-    let subscriptionEnd = null;
-    let priceId = null;
-    let productId = null;
-    let subscriptionId = null;
+    let subscriptionEnd: string | null = null;
+    let priceId: string | null = null;
+    let productId: string | null = null;
+    let subscriptionId: string | null = null;
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       subscriptionId = subscription.id;
       priceId = subscription.items.data[0]?.price?.id || null;
-      productId = subscription.items.data[0]?.price?.product || null;
+      productId = typeof subscription.items.data[0]?.price?.product === 'string'
+        ? subscription.items.data[0].price.product
+        : null;
       plan = 'pro';
-      logStep("Active subscription found", { plan, endDate: subscriptionEnd });
+
+      // Safely convert period end to ISO string
+      const periodEnd = subscription.current_period_end;
+      if (periodEnd && typeof periodEnd === 'number' && periodEnd > 0) {
+        try {
+          subscriptionEnd = new Date(periodEnd * 1000).toISOString();
+        } catch {
+          subscriptionEnd = null;
+        }
+      }
+      logStep("Active subscription found", { plan, subscriptionId, endDate: subscriptionEnd });
+    } else {
+      logStep("No active subscription");
     }
 
-    // Persist subscription state in database
-    await supabaseClient.from('user_subscriptions').upsert({
+    // Persist subscription state
+    const upsertData: Record<string, any> = {
       user_id: user.id,
       plan,
       status: hasActiveSub ? 'active' : 'inactive',
@@ -96,10 +112,18 @@ serve(async (req) => {
       stripe_product_id: productId,
       current_period_end: subscriptionEnd,
       ai_daily_limit: plan === 'pro' ? 999999 : 5,
-      storage_limit_bytes: plan === 'pro' ? 0 : 524288000,
-    }, { onConflict: 'user_id' });
+      storage_limit_bytes: plan === 'pro' ? 53687091200 : 524288000, // 50GB for pro
+    };
 
-    logStep("Subscription persisted to DB");
+    const { error: upsertError } = await supabaseClient
+      .from('user_subscriptions')
+      .upsert(upsertData, { onConflict: 'user_id' });
+
+    if (upsertError) {
+      logStep("Upsert error", { message: upsertError.message });
+    } else {
+      logStep("Subscription persisted to DB");
+    }
 
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,

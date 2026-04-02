@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownPreview } from './MarkdownPreview';
 import { useTranslations } from '@/hooks/useTranslations';
 import { useUsageLimits } from '@/hooks/useUsageLimits';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface Message {
@@ -32,7 +33,8 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslations();
-  const { canUseAi, aiUsesToday, aiDailyLimit, plan, trackAiUsage } = useUsageLimits();
+  const { canUseAi, aiUsesToday, aiDailyLimit, plan, trackAiUsage, refresh: refreshLimits } = useUsageLimits();
+  const { session } = useAuth();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -75,11 +77,12 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
     let assistantSoFar = '';
 
     try {
+      const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: allMessages,
@@ -138,7 +141,8 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
 
       // Track AI usage after successful response
       if (assistantSoFar) {
-        trackAiUsage('assistant');
+        await trackAiUsage('assistant');
+        refreshLimits();
       }
     } catch (e: any) {
       console.error('AI error:', e);
@@ -149,7 +153,7 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, noteTitle, noteContent, canUseAi, plan, aiUsesToday, aiDailyLimit, trackAiUsage]);
+  }, [messages, isLoading, noteTitle, noteContent, canUseAi, plan, aiUsesToday, aiDailyLimit, trackAiUsage, refreshLimits, session]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
