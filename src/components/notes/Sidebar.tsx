@@ -4,8 +4,9 @@ import {
   CheckSquare, Moon, Sun, ChevronDown, ChevronRight, Trash2, X,
   Pencil, GitBranch, FolderPlus, Edit3, Palette, FolderMinus,
   PanelLeftClose, PanelLeftOpen, FolderInput, Copy, LogOut, Upload,
-  BookOpen
+  BookOpen, HardDrive
 } from 'lucide-react';
+import { useUsageLimits } from '@/hooks/useUsageLimits';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
