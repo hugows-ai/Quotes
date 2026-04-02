@@ -172,7 +172,7 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
           ) : null}
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setMessages([])} title={t('aiClear')}>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setMessages([]); sessionMessages = []; }} title={t('aiClear')}>
             <Eraser className="h-3.5 w-3.5" />
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
