@@ -45,7 +45,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   const { isInstallable, install } = usePWAInstall();
   const { t } = useTranslations();
   const { user } = useAuth();
-  const { customization } = useCustomization();
+  const { customization, setCustomizationFromCloud } = useCustomization();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
