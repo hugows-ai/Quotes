@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownPreview } from './MarkdownPreview';
 import { useTranslations } from '@/hooks/useTranslations';
 import { useUsageLimits } from '@/hooks/useUsageLimits';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface Message {
