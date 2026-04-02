@@ -105,7 +105,7 @@ function StorageUsageIndicator() {
   );
 }
 
-
+export function Sidebar({
   notes, folders, todos, calendarTasks, selectedNoteId, searchQuery, isDark,
   onSelectNote, onCreateNote, onDeleteNote, onSearch, onToggleTheme,
   onAddTodo, onToggleTodo, onDeleteTodo, onSelectDate, getNotesForDate,
