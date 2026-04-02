@@ -38,6 +38,11 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
     inputRef.current?.focus();
   }, []);
 
+  // Keep session history in sync
+  useEffect(() => {
+    sessionMessages = messages;
+  }, [messages]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
