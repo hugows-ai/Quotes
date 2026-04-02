@@ -461,7 +461,7 @@ export function Sidebar({
                 <div className="pt-1">
                   <Button variant="ghost" size="sm" className="w-full gap-2 justify-start text-sidebar-foreground" onClick={onOpenTemplates}>
                     <BookOpen className="h-4 w-4" />
-                    <span className="text-sm">{t('templates') || 'Templates'}</span>
+                    <span className="text-sm">Templates</span>
                   </Button>
                 </div>
               )}
