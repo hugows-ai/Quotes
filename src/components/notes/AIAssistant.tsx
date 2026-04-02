@@ -141,7 +141,8 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
 
       // Track AI usage after successful response
       if (assistantSoFar) {
-        trackAiUsage('assistant');
+        await trackAiUsage('assistant');
+        refreshLimits();
       }
     } catch (e: any) {
       console.error('AI error:', e);
