@@ -72,7 +72,40 @@ const FOLDER_COLORS = [
   '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316',
 ];
 
-export function Sidebar({
+function StorageUsageIndicator() {
+  const { storageUsedBytes, storageLimitBytes, plan, formatBytes } = useUsageLimits();
+  if (plan === 'pro') {
+    return (
+      <div className="px-2 py-1.5">
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <HardDrive className="h-3 w-3" />
+          <span>{formatBytes(storageUsedBytes)} used · Pro (unlimited)</span>
+        </div>
+      </div>
+    );
+  }
+  const limit = storageLimitBytes || 524288000;
+  const pct = Math.min((storageUsedBytes / limit) * 100, 100);
+  return (
+    <div className="px-2 py-1.5 space-y-1">
+      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-1.5">
+          <HardDrive className="h-3 w-3" />
+          <span>Storage</span>
+        </div>
+        <span>{formatBytes(storageUsedBytes)} / {formatBytes(limit)}</span>
+      </div>
+      <div className="h-1 rounded-full bg-muted overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all ${pct > 90 ? 'bg-destructive' : pct > 70 ? 'bg-warning' : 'bg-primary'}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+
   notes, folders, todos, calendarTasks, selectedNoteId, searchQuery, isDark,
   onSelectNote, onCreateNote, onDeleteNote, onSearch, onToggleTheme,
   onAddTodo, onToggleTodo, onDeleteTodo, onSelectDate, getNotesForDate,
