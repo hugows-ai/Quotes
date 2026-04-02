@@ -13,6 +13,7 @@ import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useCloudSync } from '@/hooks/useCloudSync';
 import { useCustomization } from '@/hooks/useCustomization';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NoteType, Note } from '@/types/notes';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
