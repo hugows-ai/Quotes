@@ -22,8 +22,11 @@ interface AIAssistantProps {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`;
 
+// Session-level chat history (persists across open/close, clears on page reload)
+let sessionMessages: Message[] = [];
+
 export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: AIAssistantProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(sessionMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
