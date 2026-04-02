@@ -470,6 +470,10 @@ export function Sidebar({
               <div className="pt-2 border-t border-sidebar-border">
                 <CustomizationPanel />
               </div>
+
+              {/* Storage Usage Indicator */}
+              <StorageUsageIndicator />
+            
             </>
           )}
         </div>
