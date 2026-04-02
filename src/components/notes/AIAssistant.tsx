@@ -153,7 +153,7 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, noteTitle, noteContent, canUseAi, plan, aiUsesToday, aiDailyLimit, trackAiUsage]);
+  }, [messages, isLoading, noteTitle, noteContent, canUseAi, plan, aiUsesToday, aiDailyLimit, trackAiUsage, refreshLimits, session]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
