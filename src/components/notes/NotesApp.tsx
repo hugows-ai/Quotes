@@ -144,6 +144,9 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
           setFolders(data.folders);
           setTodos(data.todos);
           setCalendarTasks(data.calendarTasks);
+          if (data.customization) {
+            setCustomizationFromCloud(data.customization);
+          }
           toast.success(t('cloudLoaded'));
         }
       });
