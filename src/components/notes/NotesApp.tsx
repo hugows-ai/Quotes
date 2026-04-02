@@ -182,7 +182,17 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     onAdvancedSearch: () => setShowAdvancedSearch(true),
   });
 
-  // Import .md files
+  // Handle checkout success redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      toast.success('Subscription activated! Refreshing...');
+      checkSubscription();
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [checkSubscription]);
+
+
   const handleImportNotes = useCallback(() => {
     const input = document.createElement('input');
     input.type = 'file';
