@@ -13,6 +13,7 @@ import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useCloudSync } from '@/hooks/useCloudSync';
 import { useCustomization } from '@/hooks/useCustomization';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NoteType, Note } from '@/types/notes';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -45,7 +46,8 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   const { isInstallable, install } = usePWAInstall();
   const { t } = useTranslations();
   const { user } = useAuth();
-  const { customization } = useCustomization();
+  const { customization, setCustomizationFromCloud } = useCustomization();
+  const { checkSubscription } = useSubscription();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -144,6 +146,9 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
           setFolders(data.folders);
           setTodos(data.todos);
           setCalendarTasks(data.calendarTasks);
+          if (data.customization) {
+            setCustomizationFromCloud(data.customization);
+          }
           toast.success(t('cloudLoaded'));
         }
       });
@@ -177,7 +182,17 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     onAdvancedSearch: () => setShowAdvancedSearch(true),
   });
 
-  // Import .md files
+  // Handle checkout success redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      toast.success('Subscription activated! Refreshing...');
+      checkSubscription();
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [checkSubscription]);
+
+
   const handleImportNotes = useCallback(() => {
     const input = document.createElement('input');
     input.type = 'file';

@@ -344,8 +344,17 @@ export function useCustomization() {
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   }, []);
 
+  const setCustomizationFromCloud = useCallback((data: Customization) => {
+    setCustomization({
+      colors: { ...DEFAULT_COLORS, ...data.colors },
+      fonts: { ...DEFAULT_FONTS, ...data.fonts },
+      savedThemes: data.savedThemes || [],
+    });
+  }, []);
+
   return {
     customization,
+    setCustomizationFromCloud,
     updateColor,
     updateFont,
     resetColors,

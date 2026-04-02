@@ -22,8 +22,11 @@ interface AIAssistantProps {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`;
 
+// Session-level chat history (persists across open/close, clears on page reload)
+let sessionMessages: Message[] = [];
+
 export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: AIAssistantProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(sessionMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -34,6 +37,11 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Keep session history in sync
+  useEffect(() => {
+    sessionMessages = messages;
+  }, [messages]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -155,14 +163,16 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
         <div className="flex items-center gap-2">
           <Bot className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold">{t('aiAssistant')}</span>
-          {aiDailyLimit != null && (
+          {plan === 'pro' ? (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary">Pro ∞</span>
+          ) : aiDailyLimit != null ? (
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${canUseAi ? 'bg-muted text-muted-foreground' : 'bg-destructive/20 text-destructive'}`}>
               {aiUsesToday}/{aiDailyLimit}
             </span>
-          )}
+          ) : null}
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setMessages([])} title={t('aiClear')}>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setMessages([]); sessionMessages = []; }} title={t('aiClear')}>
             <Eraser className="h-3.5 w-3.5" />
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
