@@ -47,6 +47,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   const { t } = useTranslations();
   const { user } = useAuth();
   const { customization, setCustomizationFromCloud } = useCustomization();
+  const { checkSubscription } = useSubscription();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
