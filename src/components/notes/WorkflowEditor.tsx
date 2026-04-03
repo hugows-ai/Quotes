@@ -61,21 +61,17 @@ function CardNode({ data, id, selected }: NodeProps<Node<CardNodeData>>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Close editing when clicking outside the card
   useEffect(() => {
     if (!isEditing) return;
-
     const handleClickOutside = (e: MouseEvent) => {
       if (cardRef.current && !cardRef.current.contains(e.target as HTMLElement)) {
         setIsEditing(false);
         data.onDataChange?.(id, { label, content, color, image });
       }
     };
-
     const timer = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
     }, 100);
-
     return () => {
       clearTimeout(timer);
       document.removeEventListener('mousedown', handleClickOutside);
@@ -89,7 +85,6 @@ function CardNode({ data, id, selected }: NodeProps<Node<CardNodeData>>) {
       reader.onloadend = () => {
         const newImage = reader.result as string;
         setImage(newImage);
-        // Save ALL current state to prevent data loss
         data.onDataChange?.(id, { label, content, color, image: newImage });
       };
       reader.readAsDataURL(file);
@@ -106,31 +101,39 @@ function CardNode({ data, id, selected }: NodeProps<Node<CardNodeData>>) {
     setIsEditing(true);
   };
 
+  const hasTitle = label && label.trim().length > 0;
+  const hasContent = content && content.trim().length > 0;
+  const isCompact = (!hasTitle || !hasContent) && !isEditing && !image;
+
   return (
     <div
       ref={cardRef}
-      className="rounded-lg shadow-lg overflow-hidden transition-all"
+      className="rounded-lg shadow-lg overflow-hidden transition-all group"
       style={{
         backgroundColor: color,
-        minWidth: 200,
-        minHeight: 120,
+        minWidth: isCompact ? 140 : 180,
+        minHeight: isCompact ? 48 : 80,
         width: '100%',
         height: '100%',
-        border: selected ? '2px solid hsl(var(--primary))' : 'none',
+        border: selected ? '2px solid hsl(var(--primary))' : '1px solid rgba(255,255,255,0.15)',
       }}
     >
       <NodeResizer
         color="hsl(var(--primary))"
         isVisible={selected}
-        minWidth={150}
-        minHeight={100}
+        minWidth={120}
+        minHeight={40}
       />
-      {/* All 4 directional handles for horizontal & vertical connections */}
-      <Handle type="target" position={Position.Top} id="top" className="!bg-white !w-3 !h-3" />
-      <Handle type="target" position={Position.Left} id="left" className="!bg-white !w-3 !h-3" />
+      {/* Handles: visible only when editing/selected, but always functional */}
+      <Handle type="target" position={Position.Top} id="top"
+        className={`!w-3 !h-3 !border-2 !border-white/80 !bg-white transition-opacity ${isEditing || selected ? '!opacity-100' : '!opacity-0 group-hover:!opacity-60'}`}
+      />
+      <Handle type="target" position={Position.Left} id="left"
+        className={`!w-3 !h-3 !border-2 !border-white/80 !bg-white transition-opacity ${isEditing || selected ? '!opacity-100' : '!opacity-0 group-hover:!opacity-60'}`}
+      />
 
-      <div className="p-3 space-y-2 h-full flex flex-col">
-        {/* Header with title and controls */}
+      <div className={`${isCompact ? 'p-2' : 'p-3'} space-y-1.5 h-full flex flex-col`}>
+        {/* Header */}
         <div className="flex items-start gap-2">
           {isEditing ? (
             <Input
@@ -146,17 +149,18 @@ function CardNode({ data, id, selected }: NodeProps<Node<CardNodeData>>) {
               autoFocus
               className="h-6 text-sm font-semibold bg-white/20 border-white/30 text-white placeholder:text-white/60 nodrag"
             />
-          ) : (
+          ) : hasTitle ? (
             <h3
-              className="flex-1 text-sm font-semibold text-white cursor-pointer"
+              className="flex-1 text-sm font-semibold text-white cursor-pointer truncate"
               onDoubleClick={handleDoubleClick}
+              title={label}
             >
               {label}
             </h3>
-          )}
+          ) : null}
 
           {selected && (
-            <div className="flex gap-1">
+            <div className="flex gap-1 shrink-0">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button size="icon" variant="ghost" className="h-5 w-5 text-white/80 hover:text-white hover:bg-white/20">
@@ -176,7 +180,6 @@ function CardNode({ data, id, selected }: NodeProps<Node<CardNodeData>>) {
                   </div>
                 </PopoverContent>
               </Popover>
-
               <Button
                 size="icon"
                 variant="ghost"
@@ -215,21 +218,32 @@ function CardNode({ data, id, selected }: NodeProps<Node<CardNodeData>>) {
                 data.onDataChange?.(id, { label, content, color, image });
               }
             }}
-            placeholder="Adicione uma descrição..."
+            placeholder="Add a description..."
             className="flex-1 text-xs bg-white/20 border-white/30 text-white placeholder:text-white/60 min-h-[40px] resize-none nodrag"
           />
-        ) : (
+        ) : hasContent ? (
           <p
-            className="flex-1 text-xs text-white/90 cursor-pointer min-h-[20px]"
+            className="flex-1 text-xs text-white/90 cursor-pointer leading-relaxed"
             onDoubleClick={handleDoubleClick}
           >
-            {content || <span className="text-white/50 italic">Clique duas vezes para editar...</span>}
+            {content}
           </p>
-        )}
+        ) : !hasTitle && !isEditing ? (
+          <p
+            className="text-xs text-white/50 italic cursor-pointer"
+            onDoubleClick={handleDoubleClick}
+          >
+            Double-click to edit...
+          </p>
+        ) : null}
       </div>
 
-      <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-white !w-3 !h-3" />
-      <Handle type="source" position={Position.Right} id="right" className="!bg-white !w-3 !h-3" />
+      <Handle type="source" position={Position.Bottom} id="bottom"
+        className={`!w-3 !h-3 !border-2 !border-white/80 !bg-white transition-opacity ${isEditing || selected ? '!opacity-100' : '!opacity-0 group-hover:!opacity-60'}`}
+      />
+      <Handle type="source" position={Position.Right} id="right"
+        className={`!w-3 !h-3 !border-2 !border-white/80 !bg-white transition-opacity ${isEditing || selected ? '!opacity-100' : '!opacity-0 group-hover:!opacity-60'}`}
+      />
     </div>
   );
 }
@@ -280,7 +294,12 @@ export function WorkflowEditor({ initialData, onSave }: WorkflowEditorProps) {
 
   const onConnect = useCallback(
     (params: Connection) => {
-      setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#888' } }, eds));
+      setEdges((eds) => addEdge({
+        ...params,
+        animated: true,
+        style: { stroke: '#94a3b8', strokeWidth: 2 },
+        type: 'smoothstep',
+      }, eds));
     },
     [setEdges]
   );
@@ -379,10 +398,11 @@ export function WorkflowEditor({ initialData, onSave }: WorkflowEditorProps) {
   // Style edges based on selection
   const styledEdges = edges.map((edge) => ({
     ...edge,
+    type: edge.type || 'smoothstep',
     style: {
       ...edge.style,
-      stroke: edge.selected ? 'hsl(var(--primary))' : '#888',
-      strokeWidth: edge.selected ? 2 : 1,
+      stroke: edge.selected ? 'hsl(var(--primary))' : '#94a3b8',
+      strokeWidth: edge.selected ? 3 : 2,
     },
   }));
 
