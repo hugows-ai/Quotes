@@ -398,10 +398,11 @@ export function WorkflowEditor({ initialData, onSave }: WorkflowEditorProps) {
   // Style edges based on selection
   const styledEdges = edges.map((edge) => ({
     ...edge,
+    type: edge.type || 'smoothstep',
     style: {
       ...edge.style,
-      stroke: edge.selected ? 'hsl(var(--primary))' : '#888',
-      strokeWidth: edge.selected ? 2 : 1,
+      stroke: edge.selected ? 'hsl(var(--primary))' : '#94a3b8',
+      strokeWidth: edge.selected ? 3 : 2,
     },
   }));
 
