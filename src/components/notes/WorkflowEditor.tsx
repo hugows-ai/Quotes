@@ -294,7 +294,12 @@ export function WorkflowEditor({ initialData, onSave }: WorkflowEditorProps) {
 
   const onConnect = useCallback(
     (params: Connection) => {
-      setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#888' } }, eds));
+      setEdges((eds) => addEdge({
+        ...params,
+        animated: true,
+        style: { stroke: '#94a3b8', strokeWidth: 2 },
+        type: 'smoothstep',
+      }, eds));
     },
     [setEdges]
   );
