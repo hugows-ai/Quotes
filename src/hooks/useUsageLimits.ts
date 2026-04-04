@@ -21,7 +21,7 @@ export function useUsageLimits() {
     plan: 'free',
     subscriptionStatus: 'inactive',
     storageUsedBytes: 0,
-    storageLimitBytes: 524288000,
+    storageLimitBytes: 314572800,
     aiUsesToday: 0,
     aiDailyLimit: 5,
     canUseAi: true,

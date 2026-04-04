@@ -112,7 +112,7 @@ serve(async (req) => {
       stripe_product_id: productId,
       current_period_end: subscriptionEnd,
       ai_daily_limit: plan === 'pro' ? 999999 : 5,
-      storage_limit_bytes: plan === 'pro' ? 53687091200 : 524288000, // 50GB for pro
+      storage_limit_bytes: plan === 'pro' ? 53687091200 : 314572800, // 50GB pro, 300MB free
     };
 
     const { error: upsertError } = await supabaseClient
