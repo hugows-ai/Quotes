@@ -53,7 +53,7 @@ serve(async (req) => {
         stripe_product_id: null,
         current_period_end: null,
         ai_daily_limit: 5,
-        storage_limit_bytes: 524288000,
+        storage_limit_bytes: 314572800,
       }, { onConflict: 'user_id' });
 
       return new Response(JSON.stringify({ subscribed: false, plan: 'free' }), {
