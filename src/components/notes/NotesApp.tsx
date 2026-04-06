@@ -30,9 +30,12 @@ interface NotesAppProps {
 }
 
 export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
+  const { user } = useAuth();
+  const isCloudMode = !!user && !isGuest;
+
   const {
     notes, allNotes, folders, todos, calendarTasks,
-    selectedNote, selectedNoteId, searchQuery,
+    selectedNote, selectedNoteId, searchQuery, dataReady,
     setSelectedNoteId, setSearchQuery,
     createNote, updateNote, deleteNote,
     createFolder, updateFolder, deleteFolder,
@@ -40,13 +43,13 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     addCalendarTask, toggleCalendarTask, deleteCalendarTask,
     getCalendarTasksForDate, getNotesForDate,
     setNotes, setFolders, setTodos, setCalendarTasks,
-  } = useNotes();
+    markDataReady,
+  } = useNotes({ cloudMode: isCloudMode });
 
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, setIsDark } = useTheme();
   const { isInstallable, install } = usePWAInstall();
   const { t } = useTranslations();
-  const { user } = useAuth();
-  const { customization, setCustomizationFromCloud } = useCustomization();
+  const { customization, setCustomizationFromCloud, setIsDark: setCustomIsDark } = useCustomization({ cloudMode: isCloudMode });
   const { checkSubscription } = useSubscription();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
