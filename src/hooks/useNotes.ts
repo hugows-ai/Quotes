@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Note, Folder, Todo, CalendarTask } from '@/types/notes';
 
 const STORAGE_KEYS = {
@@ -37,16 +37,32 @@ const defaultNotes: Note[] = [
   },
 ];
 
-export function useNotes() {
+interface UseNotesOptions {
+  /** When true, skip localStorage loading — data will be set externally from cloud */
+  cloudMode?: boolean;
+}
+
+export function useNotes(options?: UseNotesOptions) {
+  const cloudMode = options?.cloudMode ?? false;
   const [notes, setNotes] = useState<Note[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [calendarTasks, setCalendarTasks] = useState<CalendarTask[]>([]);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dataReady, setDataReady] = useState(false);
+  const initializedRef = useRef(false);
 
-  // Load from localStorage
+  // Load from localStorage only for guest mode
   useEffect(() => {
+    if (initializedRef.current) return;
+    if (cloudMode) {
+      // In cloud mode, start empty — data will be loaded from cloud
+      initializedRef.current = true;
+      return;
+    }
+    initializedRef.current = true;
+
     const savedNotes = localStorage.getItem(STORAGE_KEYS.notes);
     const savedFolders = localStorage.getItem(STORAGE_KEYS.folders);
     const savedTodos = localStorage.getItem(STORAGE_KEYS.todos);
@@ -89,28 +105,39 @@ export function useNotes() {
         createdAt: new Date(t.createdAt),
       })));
     }
-  }, []);
 
-  // Auto-save to localStorage
+    setDataReady(true);
+  }, [cloudMode]);
+
+  // Auto-save to localStorage only in guest mode
   useEffect(() => {
+    if (cloudMode || !dataReady) return;
     if (notes.length > 0) {
       localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(notes));
     }
-  }, [notes]);
+  }, [notes, cloudMode, dataReady]);
 
   useEffect(() => {
+    if (cloudMode || !dataReady) return;
     if (folders.length > 0) {
       localStorage.setItem(STORAGE_KEYS.folders, JSON.stringify(folders));
     }
-  }, [folders]);
+  }, [folders, cloudMode, dataReady]);
 
   useEffect(() => {
+    if (cloudMode || !dataReady) return;
     localStorage.setItem(STORAGE_KEYS.todos, JSON.stringify(todos));
-  }, [todos]);
+  }, [todos, cloudMode, dataReady]);
 
   useEffect(() => {
+    if (cloudMode || !dataReady) return;
     localStorage.setItem(STORAGE_KEYS.calendarTasks, JSON.stringify(calendarTasks));
-  }, [calendarTasks]);
+  }, [calendarTasks, cloudMode, dataReady]);
+
+  // Method to mark data as ready after cloud load
+  const markDataReady = useCallback(() => {
+    setDataReady(true);
+  }, []);
 
   const selectedNote = notes.find(n => n.id === selectedNoteId) || null;
 
@@ -164,7 +191,6 @@ export function useNotes() {
   }, []);
 
   const deleteFolder = useCallback((id: string) => {
-    // Get all descendant folder IDs
     const getDescendants = (folderId: string): string[] => {
       const children = folders.filter(f => f.parentId === folderId);
       return children.reduce<string[]>(
@@ -260,6 +286,7 @@ export function useNotes() {
     selectedNote,
     selectedNoteId,
     searchQuery,
+    dataReady,
     setSelectedNoteId,
     setSearchQuery,
     setNotes,
@@ -280,5 +307,6 @@ export function useNotes() {
     deleteCalendarTask,
     getCalendarTasksForDate,
     getNotesForDate,
+    markDataReady,
   };
 }

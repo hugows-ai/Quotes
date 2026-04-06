@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export function useTheme() {
   const [isDark, setIsDark] = useState(() => {
@@ -17,7 +17,7 @@ export function useTheme() {
     localStorage.setItem('notes-app-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
-  const toggleTheme = () => setIsDark(prev => !prev);
+  const toggleTheme = useCallback(() => setIsDark(prev => !prev), []);
 
-  return { isDark, toggleTheme };
+  return { isDark, toggleTheme, setIsDark };
 }
