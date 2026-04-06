@@ -169,16 +169,17 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   }, [user, isGuest]);
 
   // Auto-sync to cloud on changes (debounced)
+  const customizationWithTheme = { ...customization, isDark };
   useEffect(() => {
-    if (!user || !cloudLoadedRef.current) return;
+    if (!user || isGuest || !cloudLoadedRef.current || !dataReady) return;
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(() => {
-      saveToCloud(allNotes, folders, todos, calendarTasks, customization);
+      saveToCloud(allNotes, folders, todos, calendarTasks, customizationWithTheme);
     }, 3000);
     return () => {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     };
-  }, [allNotes, folders, todos, calendarTasks, customization, user]);
+  }, [allNotes, folders, todos, calendarTasks, customizationWithTheme, user, isGuest, dataReady]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
