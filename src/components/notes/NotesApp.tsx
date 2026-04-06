@@ -30,9 +30,12 @@ interface NotesAppProps {
 }
 
 export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
+  const { user } = useAuth();
+  const isCloudMode = !!user && !isGuest;
+
   const {
     notes, allNotes, folders, todos, calendarTasks,
-    selectedNote, selectedNoteId, searchQuery,
+    selectedNote, selectedNoteId, searchQuery, dataReady,
     setSelectedNoteId, setSearchQuery,
     createNote, updateNote, deleteNote,
     createFolder, updateFolder, deleteFolder,
@@ -40,13 +43,13 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     addCalendarTask, toggleCalendarTask, deleteCalendarTask,
     getCalendarTasksForDate, getNotesForDate,
     setNotes, setFolders, setTodos, setCalendarTasks,
-  } = useNotes();
+    markDataReady,
+  } = useNotes({ cloudMode: isCloudMode });
 
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, setIsDark } = useTheme();
   const { isInstallable, install } = usePWAInstall();
   const { t } = useTranslations();
-  const { user } = useAuth();
-  const { customization, setCustomizationFromCloud } = useCustomization();
+  const { customization, setCustomizationFromCloud, setIsDark: setCustomIsDark } = useCustomization({ cloudMode: isCloudMode });
   const { checkSubscription } = useSubscription();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -138,37 +141,45 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
 
   // Load from cloud on login
   useEffect(() => {
-    if (user && !cloudLoadedRef.current) {
+    if (user && !isGuest && !cloudLoadedRef.current) {
       cloudLoadedRef.current = true;
       loadFromCloud().then(data => {
-        if (data && data.notes.length > 0) {
+        if (data) {
           setNotes(data.notes);
-          setFolders(data.folders);
+          setFolders(data.folders.length > 0 ? data.folders : []);
           setTodos(data.todos);
           setCalendarTasks(data.calendarTasks);
           if (data.customization) {
             setCustomizationFromCloud(data.customization);
+            // Apply dark/light mode from cloud
+            if (data.customization.isDark !== undefined) {
+              setIsDark(data.customization.isDark);
+            }
           }
+          markDataReady();
           toast.success(t('cloudLoaded'));
+        } else {
+          markDataReady();
         }
       });
     }
     if (!user) {
       cloudLoadedRef.current = false;
     }
-  }, [user]);
+  }, [user, isGuest]);
 
   // Auto-sync to cloud on changes (debounced)
+  const customizationWithTheme = { ...customization, isDark };
   useEffect(() => {
-    if (!user || !cloudLoadedRef.current) return;
+    if (!user || isGuest || !cloudLoadedRef.current || !dataReady) return;
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(() => {
-      saveToCloud(allNotes, folders, todos, calendarTasks, customization);
+      saveToCloud(allNotes, folders, todos, calendarTasks, customizationWithTheme);
     }, 3000);
     return () => {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     };
-  }, [allNotes, folders, todos, calendarTasks, customization, user]);
+  }, [allNotes, folders, todos, calendarTasks, customizationWithTheme, user, isGuest, dataReady]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
