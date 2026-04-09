@@ -7,14 +7,10 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  // Webhooks are POST only
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
   }
 
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -37,17 +33,21 @@ serve(async (req) => {
 
     let event: Stripe.Event;
 
-    // If we have a webhook secret, verify the signature
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-    if (webhookSecret && sig) {
+    if (webhookSecret) {
+      if (!sig) {
+        logStep("Missing stripe-signature header");
+        return new Response("Missing signature", { status: 400 });
+      }
       try {
         event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
       } catch (err) {
         logStep("Signature verification failed", { error: (err as Error).message });
-        return new Response(`Webhook signature verification failed`, { status: 400 });
+        return new Response("Webhook signature verification failed", { status: 400 });
       }
     } else {
-      // Without webhook secret, parse the event directly (test mode)
+      // Without webhook secret, parse directly (development/test mode)
+      logStep("WARNING: No STRIPE_WEBHOOK_SECRET set - accepting unverified events");
       event = JSON.parse(body) as Stripe.Event;
     }
 
@@ -63,35 +63,26 @@ serve(async (req) => {
     ];
 
     if (!relevantEvents.includes(event.type)) {
-      logStep("Ignoring event type", { type: event.type });
       return new Response(JSON.stringify({ received: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Helper to find user by email
     const findUserByEmail = async (email: string) => {
       const { data, error } = await supabaseClient.auth.admin.listUsers();
       if (error) throw error;
       return data.users.find(u => u.email === email);
     };
 
-    // Helper to update subscription
     const upsertSubscription = async (
-      userId: string,
-      plan: string,
-      status: string,
-      customerId: string | null,
-      subscriptionId: string | null,
-      priceId: string | null,
-      productId: string | null,
-      periodEnd: string | null,
+      userId: string, plan: string, status: string,
+      customerId: string | null, subscriptionId: string | null,
+      priceId: string | null, productId: string | null, periodEnd: string | null,
     ) => {
       const { error } = await supabaseClient.from("user_subscriptions").upsert({
         user_id: userId,
-        plan,
-        status,
+        plan, status,
         stripe_customer_id: customerId,
         stripe_subscription_id: subscriptionId,
         stripe_price_id: priceId,
@@ -113,26 +104,23 @@ serve(async (req) => {
       const customerEmail = session.customer_email || session.customer_details?.email;
       if (!customerEmail) {
         logStep("No email in checkout session");
-        return new Response(JSON.stringify({ received: true }), { headers: corsHeaders, status: 200 });
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
       }
 
       const user = await findUserByEmail(customerEmail);
       if (!user) {
-        logStep("User not found for email", { email: customerEmail });
-        return new Response(JSON.stringify({ received: true }), { headers: corsHeaders, status: 200 });
+        logStep("User not found", { email: customerEmail });
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
       }
 
-      // Fetch subscription details
       const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
       if (subscriptionId) {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         const priceId = subscription.items.data[0]?.price?.id || null;
         const productId = typeof subscription.items.data[0]?.price?.product === "string"
-          ? subscription.items.data[0].price.product
-          : null;
+          ? subscription.items.data[0].price.product : null;
         const periodEnd = subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000).toISOString()
-          : null;
+          ? new Date(subscription.current_period_end * 1000).toISOString() : null;
 
         await upsertSubscription(
           user.id, "pro", "active",
@@ -194,20 +182,19 @@ serve(async (req) => {
         const user = await findUserByEmail(customerEmail);
         if (user) {
           logStep("Payment failed for user", { userId: user.id });
-          // Don't immediately downgrade — Stripe will retry
         }
       }
     }
 
     return new Response(JSON.stringify({ received: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
     return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       status: 500,
     });
   }
