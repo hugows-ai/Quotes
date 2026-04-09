@@ -151,7 +151,6 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
           setCalendarTasks(data.calendarTasks);
           if (data.customization) {
             setCustomizationFromCloud(data.customization);
-            // Apply dark/light mode from cloud
             if (data.customization.isDark !== undefined) {
               setIsDark(data.customization.isDark);
             }
@@ -159,8 +158,13 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
           markDataReady();
           toast.success(t('cloudLoaded'));
         } else {
+          // No cloud data yet (new user) - still mark ready so data can be saved
           markDataReady();
         }
+      }).catch((err) => {
+        console.error('Cloud load failed:', err);
+        toast.error('Failed to load data from cloud');
+        markDataReady();
       });
     }
     if (!user) {
