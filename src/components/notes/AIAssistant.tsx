@@ -139,9 +139,9 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
         }
       }
 
-      // Track AI usage after successful response
+      // Usage is now tracked server-side in the edge function
+      // Just refresh the frontend counter
       if (assistantSoFar) {
-        await trackAiUsage('assistant');
         refreshLimits();
       }
     } catch (e: any) {
