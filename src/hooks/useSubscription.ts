@@ -31,7 +31,7 @@ export function useSubscription() {
   });
 
   const checkSubscription = useCallback(async () => {
-    if (!user || !session) return;
+    if (!user || !session || PAYWALL_DISABLED) return;
     setState(prev => ({ ...prev, loading: true }));
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription', {
