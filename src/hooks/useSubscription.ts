@@ -18,11 +18,14 @@ interface SubscriptionState {
   loading: boolean;
 }
 
+// TEMPORARY: All users treated as Pro. Set to false to re-enable paywall.
+const PAYWALL_DISABLED = true;
+
 export function useSubscription() {
   const { user, session } = useAuth();
   const [state, setState] = useState<SubscriptionState>({
-    plan: 'free',
-    subscribed: false,
+    plan: PAYWALL_DISABLED ? 'pro' : 'free',
+    subscribed: PAYWALL_DISABLED ? true : false,
     subscriptionEnd: null,
     loading: false,
   });

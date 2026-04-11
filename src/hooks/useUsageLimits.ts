@@ -15,15 +15,18 @@ interface UsageLimits {
   loading: boolean;
 }
 
+// TEMPORARY: All users treated as Pro. Set to false to re-enable paywall.
+const PAYWALL_DISABLED = true;
+
 export function useUsageLimits() {
   const { user, session } = useAuth();
   const [limits, setLimits] = useState<UsageLimits>({
-    plan: 'free',
-    subscriptionStatus: 'inactive',
+    plan: PAYWALL_DISABLED ? 'pro' : 'free',
+    subscriptionStatus: PAYWALL_DISABLED ? 'active' : 'inactive',
     storageUsedBytes: 0,
-    storageLimitBytes: 314572800,
+    storageLimitBytes: PAYWALL_DISABLED ? null : 314572800,
     aiUsesToday: 0,
-    aiDailyLimit: 5,
+    aiDailyLimit: PAYWALL_DISABLED ? null : 5,
     canUseAi: true,
     hasStorageCapacity: true,
     subscriptionEnd: null,
