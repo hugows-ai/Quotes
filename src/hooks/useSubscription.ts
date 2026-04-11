@@ -18,17 +18,20 @@ interface SubscriptionState {
   loading: boolean;
 }
 
+// TEMPORARY: All users treated as Pro. Set to false to re-enable paywall.
+const PAYWALL_DISABLED = true;
+
 export function useSubscription() {
   const { user, session } = useAuth();
   const [state, setState] = useState<SubscriptionState>({
-    plan: 'free',
-    subscribed: false,
+    plan: PAYWALL_DISABLED ? 'pro' : 'free',
+    subscribed: PAYWALL_DISABLED ? true : false,
     subscriptionEnd: null,
     loading: false,
   });
 
   const checkSubscription = useCallback(async () => {
-    if (!user || !session) return;
+    if (!user || !session || PAYWALL_DISABLED) return;
     setState(prev => ({ ...prev, loading: true }));
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription', {

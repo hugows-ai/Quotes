@@ -278,8 +278,8 @@ export function SettingsPanel() {
               </AccordionItem>
             )}
 
-            {/* Subscription Section */}
-            {user && (
+            {/* Subscription Section - TEMPORARILY HIDDEN (paywall disabled) */}
+            {false && user && (
               <AccordionItem value="subscription" className="border rounded-lg px-4">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
