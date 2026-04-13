@@ -29,9 +29,7 @@ export default function Auth({ onContinueAsGuest }: AuthProps) {
 
     try {
       if (view === 'forgot') {
-        const siteUrl = window.location.hostname.includes('lovable.app') 
-          ? 'https://memory-forge-plex.lovable.app' 
-          : window.location.origin;
+        const siteUrl = window.location.origin;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${siteUrl}/reset-password`,
         });
