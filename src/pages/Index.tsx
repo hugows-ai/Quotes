@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NotesApp } from '@/components/notes/NotesApp';
 import { LoadingScreen } from '@/components/notes/LoadingScreen';
 import { OnboardingScreen, isOnboardingComplete } from '@/components/notes/OnboardingScreen';
 import { useAuth } from '@/hooks/useAuth';
+import { redirectRecoveryIntentToResetPassword } from '@/lib/passwordRecovery';
 import Auth from './Auth';
 
 const GUEST_MODE_KEY = 'notes-app-guest-mode';
@@ -24,6 +25,10 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [guestMode, setGuestModeState] = useState(isGuestMode());
   const { user, loading: authLoading, signOut } = useAuth();
+
+  useEffect(() => {
+    redirectRecoveryIntentToResetPassword();
+  }, []);
 
   const handleLoadingFinished = useCallback(() => {
     setIsLoading(false);

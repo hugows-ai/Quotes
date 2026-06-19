@@ -6,6 +6,11 @@ import { useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
 import { KeyRound, Check, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import {
+  clearPasswordRecoveryMarkers,
+  hasPasswordRecoverySessionMarker,
+  markPasswordRecoverySessionActive,
+} from '@/lib/passwordRecovery';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -18,6 +23,15 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let cancelled = false;
+
+    const markReady = () => {
+      if (!cancelled) {
+        markPasswordRecoverySessionActive();
+        setSessionReady(true);
+      }
+    };
+
     // Handle PKCE code exchange from URL query params
     const url = new URL(window.location.href);
     const code = url.searchParams.get('code');
@@ -32,16 +46,22 @@ export default function ResetPassword() {
     if (code) {
       // Exchange the code for a session
       supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+        if (cancelled) return;
         if (error) {
           console.error('Code exchange error:', error);
           setError(error.message);
         } else if (data.session) {
-          setSessionReady(true);
+          markReady();
           // Clean up URL
           window.history.replaceState({}, '', '/reset-password');
+        } else {
+          setError(t('invalidResetLink') || 'Invalid or expired reset link. Please request a new one.');
         }
       });
-      return;
+
+      return () => {
+        cancelled = true;
+      };
     }
 
     // Also handle hash-based recovery (older Supabase versions)
@@ -53,18 +73,33 @@ export default function ResetPassword() {
       // The onAuthStateChange listener will handle session setup
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
         if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
-          setSessionReady(true);
+          markReady();
           subscription.unsubscribe();
         }
       });
 
-      // Timeout fallback
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          markReady();
+          subscription.unsubscribe();
+        }
+      });
+
+      // Fallback for browsers that restore the session before the listener fires.
       const timeout = setTimeout(() => {
-        setSessionReady(true);
-        subscription.unsubscribe();
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (cancelled) return;
+          if (session) {
+            markReady();
+          } else {
+            setError(t('invalidResetLink') || 'Invalid or expired reset link. Please request a new one.');
+          }
+          subscription.unsubscribe();
+        });
       }, 5000);
 
       return () => {
+        cancelled = true;
         clearTimeout(timeout);
         subscription.unsubscribe();
       };
@@ -72,12 +107,19 @@ export default function ResetPassword() {
 
     // No code or hash — check if there's already a session (user navigated directly)
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return;
       if (session) {
-        setSessionReady(true);
+        markReady();
+      } else if (hasPasswordRecoverySessionMarker()) {
+        markReady();
       } else {
         setError(t('invalidResetLink') || 'Invalid or expired reset link. Please request a new one.');
       }
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,6 +138,7 @@ export default function ResetPassword() {
       if (error) throw error;
       setSuccess(true);
       toast.success(t('passwordResetSuccess'));
+      clearPasswordRecoveryMarkers();
       // Sign out after password reset to force fresh login
       await supabase.auth.signOut();
       setTimeout(() => navigate('/'), 2000);

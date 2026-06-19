@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from '@/hooks/useTranslations';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { getResetPasswordRedirectUrl, markPasswordRecoveryEmailRequested } from '@/lib/passwordRecovery';
 import { toast } from 'sonner';
 import { LogIn, UserPlus, KeyRound, ArrowLeft, FileText, Download, Monitor } from 'lucide-react';
 
@@ -29,11 +30,11 @@ export default function Auth({ onContinueAsGuest }: AuthProps) {
 
     try {
       if (view === 'forgot') {
-        const siteUrl = window.location.origin;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${siteUrl}/reset-password`,
+          redirectTo: getResetPasswordRedirectUrl(),
         });
         if (error) throw error;
+        markPasswordRecoveryEmailRequested();
         setForgotSent(true);
         toast.success(t('forgotPasswordSent'));
       } else if (view === 'login') {
