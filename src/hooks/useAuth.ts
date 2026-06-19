@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
+import { isResetPasswordRoute, markPasswordRecoverySessionActive } from '@/lib/passwordRecovery';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -14,9 +15,12 @@ export function useAuth() {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Handle password recovery - redirect to reset page
+        // Handle password recovery without letting the app fall back to login.
         if (event === 'PASSWORD_RECOVERY') {
-          window.location.href = '/reset-password';
+          markPasswordRecoverySessionActive();
+          if (!isResetPasswordRoute()) {
+            window.location.replace('/reset-password');
+          }
         }
       }
     );
