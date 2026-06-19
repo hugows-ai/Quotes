@@ -173,17 +173,19 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   }, [user, isGuest]);
 
   // Auto-sync to cloud on changes (debounced)
-  const customizationWithTheme = { ...customization, isDark };
+  // IMPORTANT: depend on `customization` + `isDark` directly — NOT a freshly-built object,
+  // which would create a new reference every render and continuously reset the debounce,
+  // preventing saves from ever firing while the user types.
   useEffect(() => {
     if (!user || isGuest || !cloudLoadedRef.current || !dataReady) return;
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(() => {
-      saveToCloud(allNotes, folders, todos, calendarTasks, customizationWithTheme);
+      saveToCloud(allNotes, folders, todos, calendarTasks, { ...customization, isDark });
     }, 3000);
     return () => {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     };
-  }, [allNotes, folders, todos, calendarTasks, customizationWithTheme, user, isGuest, dataReady]);
+  }, [allNotes, folders, todos, calendarTasks, customization, isDark, user, isGuest, dataReady, saveToCloud]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
