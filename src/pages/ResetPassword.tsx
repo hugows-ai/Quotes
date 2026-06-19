@@ -85,10 +85,17 @@ export default function ResetPassword() {
         }
       });
 
-      // Timeout fallback
+      // Fallback for browsers that restore the session before the listener fires.
       const timeout = setTimeout(() => {
-        markReady();
-        subscription.unsubscribe();
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (cancelled) return;
+          if (session) {
+            markReady();
+          } else {
+            setError(t('invalidResetLink') || 'Invalid or expired reset link. Please request a new one.');
+          }
+          subscription.unsubscribe();
+        });
       }, 5000);
 
       return () => {
