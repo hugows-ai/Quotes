@@ -3,6 +3,7 @@ import { NotesApp } from '@/components/notes/NotesApp';
 import { LoadingScreen } from '@/components/notes/LoadingScreen';
 import { OnboardingScreen, isOnboardingComplete } from '@/components/notes/OnboardingScreen';
 import { useAuth } from '@/hooks/useAuth';
+import { redirectRecoveryIntentToResetPassword } from '@/lib/passwordRecovery';
 import Auth from './Auth';
 
 const GUEST_MODE_KEY = 'notes-app-guest-mode';
@@ -20,6 +21,8 @@ export function setGuestMode(value: boolean) {
 }
 
 const Index = () => {
+  redirectRecoveryIntentToResetPassword();
+
   const [showOnboarding, setShowOnboarding] = useState(!isOnboardingComplete());
   const [isLoading, setIsLoading] = useState(true);
   const [guestMode, setGuestModeState] = useState(isGuestMode());
