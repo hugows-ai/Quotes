@@ -46,10 +46,16 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     markDataReady,
   } = useNotes({ cloudMode: isCloudMode });
 
-  const { isDark, toggleTheme, setIsDark } = useTheme();
+  const { isDark, toggleTheme, setIsDark } = useTheme({ cloudMode: isCloudMode });
   const { isInstallable, install } = usePWAInstall();
   const { t } = useTranslations();
-  const { customization, setCustomizationFromCloud, setIsDark: setCustomIsDark } = useCustomization({ cloudMode: isCloudMode });
+  const {
+    customization,
+    cloudReady: customizationCloudReady,
+    setCustomizationFromCloud,
+    markCloudReady: markCustomizationCloudReady,
+    setIsDark: setCustomIsDark,
+  } = useCustomization({ cloudMode: isCloudMode });
   const { checkSubscription } = useSubscription();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
