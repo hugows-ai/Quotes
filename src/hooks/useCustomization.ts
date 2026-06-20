@@ -323,11 +323,18 @@ export function useCustomization(options?: UseCustomizationOptions) {
       savedThemes: data.savedThemes || [],
       isDark: data.isDark,
     });
+    setCloudReady(true);
+  }, []);
+
+  const markCloudReady = useCallback(() => {
+    setCloudReady(true);
   }, []);
 
   return {
     customization,
+    cloudReady,
     setCustomizationFromCloud,
+    markCloudReady,
     updateColor,
     updateFont,
     resetColors,
@@ -339,3 +346,4 @@ export function useCustomization(options?: UseCustomizationOptions) {
     setIsDark,
   };
 }
+
