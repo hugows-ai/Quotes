@@ -1,7 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-export function useTheme() {
+interface UseThemeOptions {
+  /**
+   * When true, this hook will NOT read or write localStorage.
+   * Use this for authenticated users where the theme is owned by
+   * the cloud customization record (prevents cross-account pollution
+   * and prevents stale local values from overwriting cloud state).
+   */
+  cloudMode?: boolean;
+}
+
+export function useTheme(options?: UseThemeOptions) {
+  const cloudMode = options?.cloudMode ?? false;
+  const cloudModeRef = useRef(cloudMode);
+  cloudModeRef.current = cloudMode;
+
   const [isDark, setIsDark] = useState(() => {
+    if (cloudMode) {
+      // In cloud mode start from system pref; cloud value will override after load.
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
     const saved = localStorage.getItem('notes-app-theme');
     if (saved) return saved === 'dark';
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -14,7 +32,12 @@ export function useTheme() {
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('notes-app-theme', isDark ? 'dark' : 'light');
+    // Only persist to localStorage for guests. Authenticated users persist
+    // through the cloud customization record to avoid leaking the previous
+    // account's preference into a new login.
+    if (!cloudModeRef.current) {
+      localStorage.setItem('notes-app-theme', isDark ? 'dark' : 'light');
+    }
   }, [isDark]);
 
   const toggleTheme = useCallback(() => setIsDark(prev => !prev), []);
