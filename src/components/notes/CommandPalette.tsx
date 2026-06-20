@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/command';
 import { Note, Folder, Todo } from '@/types/notes';
 import { useTranslations } from '@/hooks/useTranslations';
-import { useTheme } from '@/hooks/useTheme';
 
 interface CommandPaletteProps {
   notes: Note[];
@@ -21,16 +20,19 @@ interface CommandPaletteProps {
   onCreateNote: (type: 'text' | 'drawing' | 'workflow') => void;
   onOpenAdvancedSearch: () => void;
   onOpenTemplates: () => void;
+  isDark: boolean;
+  onToggleTheme: () => void;
 }
 
 export function CommandPalette({
   notes, folders, todos,
   onSelectNote, onCreateNote,
   onOpenAdvancedSearch, onOpenTemplates,
+  isDark, onToggleTheme,
 }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslations();
-  const { isDark, toggleTheme } = useTheme();
+  const toggleTheme = onToggleTheme;
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
