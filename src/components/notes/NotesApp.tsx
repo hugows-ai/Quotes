@@ -54,6 +54,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     cloudReady: customizationCloudReady,
     setCustomizationFromCloud,
     markCloudReady: markCustomizationCloudReady,
+    resetForUserChange: resetCustomizationForUserChange,
     setIsDark: setCustomIsDark,
   } = useCustomization({ cloudMode: isCloudMode });
   const { checkSubscription } = useSubscription();
@@ -143,45 +144,58 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   // Cloud sync
   const { loadFromCloud, saveToCloud, syncing, lastSynced } = useCloudSync(user);
   const cloudLoadedRef = useRef(false);
+  const loadedUserIdRef = useRef<string | null>(null);
   const syncTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Load from cloud on login
+  // Load from cloud on login. If the authenticated user changes (account switch),
+  // reset customization state first so the previous user's theme cannot be
+  // written into the new user's cloud record.
   useEffect(() => {
-    if (user && !isGuest && !cloudLoadedRef.current) {
-      cloudLoadedRef.current = true;
-      loadFromCloud().then(data => {
-        if (data) {
-          setNotes(data.notes);
-          setFolders(data.folders.length > 0 ? data.folders : []);
-          setTodos(data.todos);
-          setCalendarTasks(data.calendarTasks);
-          if (data.customization) {
-            setCustomizationFromCloud(data.customization);
-            if (data.customization.isDark !== undefined) {
-              setIsDark(data.customization.isDark);
-            }
-          } else {
-            // No saved customization yet — mark ready so future edits sync.
-            markCustomizationCloudReady();
-          }
-          markDataReady();
-          toast.success(t('cloudLoaded'));
-        } else {
-          // No cloud data yet (new user) - still mark ready so data can be saved
-          markCustomizationCloudReady();
-          markDataReady();
-        }
-      }).catch((err) => {
-        console.error('Cloud load failed:', err);
-        toast.error('Failed to load data from cloud');
-        // Do NOT mark customization cloud-ready: we don't want a transient
-        // load failure to overwrite the user's saved theme with defaults.
-        markDataReady();
-      });
-    }
     if (!user) {
       cloudLoadedRef.current = false;
+      loadedUserIdRef.current = null;
+      return;
     }
+    if (isGuest) return;
+    if (loadedUserIdRef.current === user.id) return;
+
+    // New user (or first load) — reset and reload.
+    loadedUserIdRef.current = user.id;
+    cloudLoadedRef.current = false;
+    resetCustomizationForUserChange();
+
+    loadFromCloud().then(data => {
+      if (data) {
+        setNotes(data.notes);
+        setFolders(data.folders.length > 0 ? data.folders : []);
+        setTodos(data.todos);
+        setCalendarTasks(data.calendarTasks);
+        if (data.customization) {
+          setCustomizationFromCloud(data.customization);
+          if (data.customization.isDark !== undefined) {
+            setIsDark(data.customization.isDark);
+          }
+        } else {
+          // No saved customization yet — mark ready so future edits sync.
+          markCustomizationCloudReady();
+        }
+        markDataReady();
+        cloudLoadedRef.current = true;
+        toast.success(t('cloudLoaded'));
+      } else {
+        // No cloud data yet (new user) - still mark ready so data can be saved
+        markCustomizationCloudReady();
+        markDataReady();
+        cloudLoadedRef.current = true;
+      }
+    }).catch((err) => {
+      console.error('Cloud load failed:', err);
+      toast.error('Failed to load data from cloud');
+      // Do NOT mark customization cloud-ready: we don't want a transient
+      // load failure to overwrite the user's saved theme with defaults.
+      markDataReady();
+      cloudLoadedRef.current = true;
+    });
   }, [user, isGuest]);
 
   // Auto-sync to cloud on changes (debounced)
