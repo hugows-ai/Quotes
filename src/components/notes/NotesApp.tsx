@@ -530,6 +530,8 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
         onCreateNote={(type) => createNote(type)}
         onOpenAdvancedSearch={() => setShowAdvancedSearch(true)}
         onOpenTemplates={() => setShowTemplates(true)}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Template Library */}
