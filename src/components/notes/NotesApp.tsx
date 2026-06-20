@@ -54,6 +54,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     cloudReady: customizationCloudReady,
     setCustomizationFromCloud,
     markCloudReady: markCustomizationCloudReady,
+    resetForUserChange: resetCustomizationForUserChange,
     setIsDark: setCustomIsDark,
   } = useCustomization({ cloudMode: isCloudMode });
   const { checkSubscription } = useSubscription();
