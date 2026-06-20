@@ -113,6 +113,13 @@ export function useCustomization(options?: UseCustomizationOptions) {
     return { colors: DEFAULT_COLORS, fonts: DEFAULT_FONTS, savedThemes: [] };
   });
 
+  // Tracks whether customization is safe to write back to the cloud.
+  // Guests are always ready (they only touch localStorage). Cloud users
+  // are only ready after we've either loaded their existing record or
+  // confirmed none exists — this prevents the initial default-state
+  // render from clobbering a saved theme.
+  const [cloudReady, setCloudReady] = useState<boolean>(!cloudMode);
+
   // Load fonts dynamically
   useEffect(() => {
     const loadFont = (fontName: string) => {
@@ -316,11 +323,18 @@ export function useCustomization(options?: UseCustomizationOptions) {
       savedThemes: data.savedThemes || [],
       isDark: data.isDark,
     });
+    setCloudReady(true);
+  }, []);
+
+  const markCloudReady = useCallback(() => {
+    setCloudReady(true);
   }, []);
 
   return {
     customization,
+    cloudReady,
     setCustomizationFromCloud,
+    markCloudReady,
     updateColor,
     updateFont,
     resetColors,
@@ -332,3 +346,4 @@ export function useCustomization(options?: UseCustomizationOptions) {
     setIsDark,
   };
 }
+

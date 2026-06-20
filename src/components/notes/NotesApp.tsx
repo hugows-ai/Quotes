@@ -46,10 +46,16 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     markDataReady,
   } = useNotes({ cloudMode: isCloudMode });
 
-  const { isDark, toggleTheme, setIsDark } = useTheme();
+  const { isDark, toggleTheme, setIsDark } = useTheme({ cloudMode: isCloudMode });
   const { isInstallable, install } = usePWAInstall();
   const { t } = useTranslations();
-  const { customization, setCustomizationFromCloud, setIsDark: setCustomIsDark } = useCustomization({ cloudMode: isCloudMode });
+  const {
+    customization,
+    cloudReady: customizationCloudReady,
+    setCustomizationFromCloud,
+    markCloudReady: markCustomizationCloudReady,
+    setIsDark: setCustomIsDark,
+  } = useCustomization({ cloudMode: isCloudMode });
   const { checkSubscription } = useSubscription();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -154,16 +160,22 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
             if (data.customization.isDark !== undefined) {
               setIsDark(data.customization.isDark);
             }
+          } else {
+            // No saved customization yet — mark ready so future edits sync.
+            markCustomizationCloudReady();
           }
           markDataReady();
           toast.success(t('cloudLoaded'));
         } else {
           // No cloud data yet (new user) - still mark ready so data can be saved
+          markCustomizationCloudReady();
           markDataReady();
         }
       }).catch((err) => {
         console.error('Cloud load failed:', err);
         toast.error('Failed to load data from cloud');
+        // Do NOT mark customization cloud-ready: we don't want a transient
+        // load failure to overwrite the user's saved theme with defaults.
         markDataReady();
       });
     }
@@ -180,12 +192,18 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     if (!user || isGuest || !cloudLoadedRef.current || !dataReady) return;
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(() => {
-      saveToCloud(allNotes, folders, todos, calendarTasks, { ...customization, isDark });
+      // Only include customization in the save once we've reconciled with
+      // the cloud — otherwise the initial default state could overwrite
+      // a saved theme before loadFromCloud resolves.
+      const customizationToSave = customizationCloudReady
+        ? { ...customization, isDark }
+        : undefined;
+      saveToCloud(allNotes, folders, todos, calendarTasks, customizationToSave);
     }, 3000);
     return () => {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     };
-  }, [allNotes, folders, todos, calendarTasks, customization, isDark, user, isGuest, dataReady, saveToCloud]);
+  }, [allNotes, folders, todos, calendarTasks, customization, isDark, customizationCloudReady, user, isGuest, dataReady, saveToCloud]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -512,6 +530,8 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
         onCreateNote={(type) => createNote(type)}
         onOpenAdvancedSearch={() => setShowAdvancedSearch(true)}
         onOpenTemplates={() => setShowTemplates(true)}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Template Library */}
