@@ -330,11 +330,21 @@ export function useCustomization(options?: UseCustomizationOptions) {
     setCloudReady(true);
   }, []);
 
+  // Reset in-memory state to defaults and mark not-ready. Used when the
+  // authenticated user changes (logout, account switch) so the previous
+  // user's customization cannot leak into the new account's cloud record
+  // before loadFromCloud resolves.
+  const resetForUserChange = useCallback(() => {
+    setCustomization({ colors: DEFAULT_COLORS, fonts: DEFAULT_FONTS, savedThemes: [] });
+    setCloudReady(false);
+  }, []);
+
   return {
     customization,
     cloudReady,
     setCustomizationFromCloud,
     markCloudReady,
+    resetForUserChange,
     updateColor,
     updateFont,
     resetColors,
