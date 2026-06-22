@@ -100,7 +100,7 @@ export function CustomizationPanel() {
     applyTheme,
     hexToHsl, 
     hslToHex 
-  } = useCustomization();
+  } = useCustomizationContext();
   const { t } = useTranslations();
   
   const [isOpen, setIsOpen] = useState(false);
