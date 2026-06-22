@@ -567,6 +567,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
         onCancel={() => setUnlockNoteId(null)}
       />
     </>
+    </CustomizationContext.Provider>
   );
 }
 
