@@ -13,6 +13,7 @@ import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useCloudSync } from '@/hooks/useCloudSync';
 import { useCustomization } from '@/hooks/useCustomization';
+import { CustomizationContext } from '@/hooks/customizationContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NoteType, Note } from '@/types/notes';
@@ -49,6 +50,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   const { isDark, toggleTheme, setIsDark } = useTheme({ cloudMode: isCloudMode });
   const { isInstallable, install } = usePWAInstall();
   const { t } = useTranslations();
+  const customizationCtx = useCustomization({ cloudMode: isCloudMode });
   const {
     customization,
     cloudReady: customizationCloudReady,
@@ -56,7 +58,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     markCloudReady: markCustomizationCloudReady,
     resetForUserChange: resetCustomizationForUserChange,
     setIsDark: setCustomIsDark,
-  } = useCustomization({ cloudMode: isCloudMode });
+  } = customizationCtx;
   const { checkSubscription } = useSubscription();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -428,6 +430,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   };
 
   return (
+    <CustomizationContext.Provider value={customizationCtx}>
     <>
       {isMobile ? (
         <div className="h-[100dvh] flex flex-col overflow-hidden">
@@ -564,6 +567,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
         onCancel={() => setUnlockNoteId(null)}
       />
     </>
+    </CustomizationContext.Provider>
   );
 }
 

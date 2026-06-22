@@ -27,12 +27,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  useCustomization, 
-  CustomColors, 
-  AVAILABLE_FONTS, 
-  PRESET_THEMES 
+import {
+  CustomColors,
+  AVAILABLE_FONTS,
+  PRESET_THEMES,
 } from '@/hooks/useCustomization';
+import { useCustomizationContext } from '@/hooks/customizationContext';
 import { useTranslations } from '@/hooks/useTranslations';
 import { cn } from '@/lib/utils';
 
@@ -100,7 +100,7 @@ export function CustomizationPanel() {
     applyTheme,
     hexToHsl, 
     hslToHex 
-  } = useCustomization();
+  } = useCustomizationContext();
   const { t } = useTranslations();
   
   const [isOpen, setIsOpen] = useState(false);
