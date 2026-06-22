@@ -430,6 +430,7 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
   };
 
   return (
+    <CustomizationContext.Provider value={customizationCtx}>
     <>
       {isMobile ? (
         <div className="h-[100dvh] flex flex-col overflow-hidden">
