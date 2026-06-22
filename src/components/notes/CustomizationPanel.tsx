@@ -27,12 +27,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  useCustomization, 
-  CustomColors, 
-  AVAILABLE_FONTS, 
-  PRESET_THEMES 
+import {
+  CustomColors,
+  AVAILABLE_FONTS,
+  PRESET_THEMES,
 } from '@/hooks/useCustomization';
+import { useCustomizationContext } from '@/hooks/customizationContext';
 import { useTranslations } from '@/hooks/useTranslations';
 import { cn } from '@/lib/utils';
 
