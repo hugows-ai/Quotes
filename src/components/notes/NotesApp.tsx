@@ -356,54 +356,57 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
 
   if (focusMode && selectedNote) {
     return (
-      <FocusMode 
-        onExit={() => { setFocusMode(false); setFocusTimerState(null); }}
-        onTimerStateChange={setFocusTimerState}
-        sidebarCollapsed={sidebarCollapsed}
-        onToggleSidebar={() => setSidebarCollapsed(prev => !prev)}
-      >
-        <ResizablePanelGroup direction="horizontal" className="h-full">
-          {!sidebarCollapsed && (
-            <>
-              <ResizablePanel defaultSize={22} minSize={15} maxSize={40}>
-                <Sidebar
-                  notes={notes} allNotes={allNotes} folders={folders} todos={todos}
-                  calendarTasks={calendarTasks} selectedNoteId={selectedNoteId}
-                  searchQuery={searchQuery} isDark={isDark}
-                  onSelectNote={handleSelectNote} onCreateNote={handleCreateNote}
-                  onDeleteNote={moveToTrash} onSearch={setSearchQuery}
-                  onToggleTheme={toggleTheme} onAddTodo={(text) => addTodo(text)}
-                  onToggleTodo={toggleTodo} onDeleteTodo={deleteTodo}
-                  onSelectDate={handleSelectDate} getNotesForDate={getNotesForDate}
-                  onCreateFolder={createFolder} onUpdateFolder={updateFolder}
-                  onDeleteFolder={deleteFolder} onAddCalendarTask={addCalendarTask}
-                  onToggleCalendarTask={toggleCalendarTask}
-                  onDeleteCalendarTask={deleteCalendarTask}
-                  getCalendarTasksForDate={getCalendarTasksForDate}
-                  collapsed={false} onToggleCollapse={() => setSidebarCollapsed(true)}
-                  onMoveNote={handleMoveNote} onOpenAdvancedSearch={() => setShowAdvancedSearch(true)}
-                  onRenameNote={handleRenameNote} onSignOut={onSignOut}
-                  onImportNotes={handleImportNotes}
-                  trashedNotes={trashedNotes}
-                  onShowTrash={() => setShowTrash(true)}
-                  onOpenTemplates={() => setShowTemplates(true)}
-                />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-            </>
-          )}
-          <ResizablePanel defaultSize={sidebarCollapsed ? 100 : 78}>
-            <NoteEditor
-              key={`focus-${selectedNote.id}`}
-              note={selectedNote}
-              folders={folders}
-              onUpdate={(updates) => updateNote(selectedNote.id, updates)}
-            />
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </FocusMode>
+      <CustomizationContext.Provider value={customizationCtx}>
+        <FocusMode 
+          onExit={() => { setFocusMode(false); setFocusTimerState(null); }}
+          onTimerStateChange={setFocusTimerState}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed(prev => !prev)}
+        >
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+            {!sidebarCollapsed && (
+              <>
+                <ResizablePanel defaultSize={22} minSize={15} maxSize={40}>
+                  <Sidebar
+                    notes={notes} allNotes={allNotes} folders={folders} todos={todos}
+                    calendarTasks={calendarTasks} selectedNoteId={selectedNoteId}
+                    searchQuery={searchQuery} isDark={isDark}
+                    onSelectNote={handleSelectNote} onCreateNote={handleCreateNote}
+                    onDeleteNote={moveToTrash} onSearch={setSearchQuery}
+                    onToggleTheme={toggleTheme} onAddTodo={(text) => addTodo(text)}
+                    onToggleTodo={toggleTodo} onDeleteTodo={deleteTodo}
+                    onSelectDate={handleSelectDate} getNotesForDate={getNotesForDate}
+                    onCreateFolder={createFolder} onUpdateFolder={updateFolder}
+                    onDeleteFolder={deleteFolder} onAddCalendarTask={addCalendarTask}
+                    onToggleCalendarTask={toggleCalendarTask}
+                    onDeleteCalendarTask={deleteCalendarTask}
+                    getCalendarTasksForDate={getCalendarTasksForDate}
+                    collapsed={false} onToggleCollapse={() => setSidebarCollapsed(true)}
+                    onMoveNote={handleMoveNote} onOpenAdvancedSearch={() => setShowAdvancedSearch(true)}
+                    onRenameNote={handleRenameNote} onSignOut={onSignOut}
+                    onImportNotes={handleImportNotes}
+                    trashedNotes={trashedNotes}
+                    onShowTrash={() => setShowTrash(true)}
+                    onOpenTemplates={() => setShowTemplates(true)}
+                  />
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+              </>
+            )}
+            <ResizablePanel defaultSize={sidebarCollapsed ? 100 : 78}>
+              <NoteEditor
+                key={`focus-${selectedNote.id}`}
+                note={selectedNote}
+                folders={folders}
+                onUpdate={(updates) => updateNote(selectedNote.id, updates)}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </FocusMode>
+      </CustomizationContext.Provider>
     );
   }
+
 
   const sidebarProps = {
     notes, allNotes, folders, todos,
