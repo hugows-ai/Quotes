@@ -139,8 +139,12 @@ export function useCustomization(options?: UseCustomizationOptions) {
     loadFont(customization.fonts.contentFont);
   }, [customization.fonts]);
 
-  // Apply custom colors and fonts to CSS variables
+  // Apply custom colors and fonts to CSS variables.
+  // In cloud mode, do NOT touch CSS variables until we've reconciled with the
+  // cloud — otherwise the initial default (all-null) state would strip any
+  // previously-applied CSS variables before the saved theme arrives.
   useEffect(() => {
+    if (cloudMode && !cloudReady) return;
     const root = document.documentElement;
     
     if (customization.colors.sidebarBackground) {
@@ -179,7 +183,8 @@ export function useCustomization(options?: UseCustomizationOptions) {
     
     const contentFont = AVAILABLE_FONTS.find(f => f.value === customization.fonts.contentFont);
     root.style.setProperty('--font-content', `'${customization.fonts.contentFont}', ${contentFont?.type || 'serif'}`);
-  }, [customization]);
+  }, [customization, cloudMode, cloudReady]);
+
 
   // Apply dark/light mode from customization
   useEffect(() => {
@@ -260,9 +265,13 @@ export function useCustomization(options?: UseCustomizationOptions) {
 
   const setIsDark = useCallback((isDark: boolean) => {
     setCustomization(prev => ({ ...prev, isDark }));
-    // Also save to localStorage for immediate use on next load
-    localStorage.setItem('notes-app-theme', isDark ? 'dark' : 'light');
-  }, []);
+    // Only persist to localStorage for guests; authenticated users persist
+    // through the cloud customization record to prevent cross-account leaks.
+    if (!cloudMode) {
+      localStorage.setItem('notes-app-theme', isDark ? 'dark' : 'light');
+    }
+  }, [cloudMode]);
+
 
   const hexToHsl = useCallback((hex: string): string => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
