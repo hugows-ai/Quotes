@@ -54,7 +54,7 @@ import { SetPasswordDialog } from './PasswordDialog';
 import { AIAssistant } from './AIAssistant';
 import { toast } from 'sonner';
 import { useTranslations } from '@/hooks/useTranslations';
-import { useCustomization } from '@/hooks/useCustomization';
+import { useCustomizationContext } from '@/hooks/customizationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -80,7 +80,7 @@ export function NoteEditor({ note, folders, onUpdate, onFocusMode }: NoteEditorP
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const { t } = useTranslations();
-  const { customization } = useCustomization();
+  const { customization } = useCustomizationContext();
   const { user } = useAuth();
 
   // Read auto-save setting
