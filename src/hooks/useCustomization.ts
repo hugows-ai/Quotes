@@ -139,8 +139,12 @@ export function useCustomization(options?: UseCustomizationOptions) {
     loadFont(customization.fonts.contentFont);
   }, [customization.fonts]);
 
-  // Apply custom colors and fonts to CSS variables
+  // Apply custom colors and fonts to CSS variables.
+  // In cloud mode, do NOT touch CSS variables until we've reconciled with the
+  // cloud — otherwise the initial default (all-null) state would strip any
+  // previously-applied CSS variables before the saved theme arrives.
   useEffect(() => {
+    if (cloudMode && !cloudReady) return;
     const root = document.documentElement;
     
     if (customization.colors.sidebarBackground) {
@@ -179,7 +183,8 @@ export function useCustomization(options?: UseCustomizationOptions) {
     
     const contentFont = AVAILABLE_FONTS.find(f => f.value === customization.fonts.contentFont);
     root.style.setProperty('--font-content', `'${customization.fonts.contentFont}', ${contentFont?.type || 'serif'}`);
-  }, [customization]);
+  }, [customization, cloudMode, cloudReady]);
+
 
   // Apply dark/light mode from customization
   useEffect(() => {
