@@ -80,7 +80,7 @@ export function NoteEditor({ note, folders, onUpdate, onFocusMode }: NoteEditorP
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const { t } = useTranslations();
-  const { customization } = useCustomization();
+  const { customization } = useCustomizationContext();
   const { user } = useAuth();
 
   // Read auto-save setting
