@@ -265,9 +265,13 @@ export function useCustomization(options?: UseCustomizationOptions) {
 
   const setIsDark = useCallback((isDark: boolean) => {
     setCustomization(prev => ({ ...prev, isDark }));
-    // Also save to localStorage for immediate use on next load
-    localStorage.setItem('notes-app-theme', isDark ? 'dark' : 'light');
-  }, []);
+    // Only persist to localStorage for guests; authenticated users persist
+    // through the cloud customization record to prevent cross-account leaks.
+    if (!cloudMode) {
+      localStorage.setItem('notes-app-theme', isDark ? 'dark' : 'light');
+    }
+  }, [cloudMode]);
+
 
   const hexToHsl = useCallback((hex: string): string => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
