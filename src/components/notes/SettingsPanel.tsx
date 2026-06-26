@@ -129,77 +129,182 @@ export function SettingsPanel() {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  const exportData = () => {
-    const notes = localStorage.getItem('notes-app-notes');
-    const folders = localStorage.getItem('notes-app-folders');
-    const todos = localStorage.getItem('notes-app-todos');
-    const customization = localStorage.getItem('notes-customization');
-    
-    const data = {
-      notes: notes ? JSON.parse(notes) : [],
-      folders: folders ? JSON.parse(folders) : [],
-      todos: todos ? JSON.parse(todos) : [],
-      customization: customization ? JSON.parse(customization) : {},
-      exportedAt: new Date().toISOString(),
+  const fetchCurrentData = async () => {
+    if (user) {
+      const [notesRes, foldersRes, todosRes, tasksRes, customRes] = await Promise.all([
+        supabase.from('notes').select('*').eq('user_id', user.id),
+        supabase.from('folders').select('*').eq('user_id', user.id),
+        supabase.from('todos').select('*').eq('user_id', user.id),
+        supabase.from('calendar_tasks').select('*').eq('user_id', user.id),
+        supabase.from('user_customizations').select('*').eq('user_id', user.id).maybeSingle(),
+      ]);
+      return {
+        notes: (notesRes.data || []).map((n: any) => ({
+          id: n.id, title: n.title, content: n.content, type: n.type,
+          folderId: n.folder_id, tags: n.tags || [],
+          createdAt: n.created_at, updatedAt: n.updated_at,
+          linkedDate: n.linked_date, drawingData: n.drawing_data,
+          workflowData: n.workflow_data, password: n.password,
+        })),
+        folders: (foldersRes.data || []).map((f: any) => ({
+          id: f.id, name: f.name, color: f.color, parentId: f.parent_id,
+        })),
+        todos: (todosRes.data || []).map((t: any) => ({
+          id: t.id, text: t.text, completed: t.completed,
+          noteId: t.note_id, createdAt: t.created_at,
+        })),
+        calendarTasks: (tasksRes.data || []).map((t: any) => ({
+          id: t.id, text: t.text, completed: t.completed, date: t.date,
+          createdAt: t.created_at, reminderTime: t.reminder_time,
+          reminderNotified: t.reminder_notified,
+        })),
+        customization: customRes.data?.customization_data || null,
+      };
+    }
+    return {
+      notes: JSON.parse(localStorage.getItem('notes-app-notes') || '[]'),
+      folders: JSON.parse(localStorage.getItem('notes-app-folders') || '[]'),
+      todos: JSON.parse(localStorage.getItem('notes-app-todos') || '[]'),
+      calendarTasks: JSON.parse(localStorage.getItem('notes-app-calendar-tasks') || '[]'),
+      customization: JSON.parse(localStorage.getItem('notes-customization') || '{}'),
     };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  };
+
+  const downloadBlob = (content: string, filename: string, mime: string) => {
+    const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `notes-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const downloadAllNotesAsMd = () => {
-    const notesStr = localStorage.getItem('notes-app-notes');
-    if (!notesStr) return;
-    const notes = JSON.parse(notesStr);
-    notes.forEach((note: { title: string; content: string }) => {
-      const blob = new Blob([`# ${note.title}\n\n${note.content}`], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${note.title.replace(/[^a-zA-Z0-9\u00C0-\u024F]/g, '_')}.md`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+  const exportData = async () => {
+    try {
+      const data = { ...(await fetchCurrentData()), exportedAt: new Date().toISOString() };
+      downloadBlob(JSON.stringify(data, null, 2), `notes-backup-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+      toast.success(t('exportData'));
+    } catch (e) {
+      console.error(e);
+      toast.error(t('importError'));
+    }
   };
 
-  const downloadAllNotesAsTxt = () => {
-    const notesStr = localStorage.getItem('notes-app-notes');
-    if (!notesStr) return;
-    const notes = JSON.parse(notesStr);
-    notes.forEach((note: { title: string; content: string }) => {
-      const blob = new Blob([`${note.title}\n\n${note.content}`], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${note.title.replace(/[^a-zA-Z0-9\u00C0-\u024F]/g, '_')}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+  const sanitizeFilename = (s: string) => (s || 'note').replace(/[^a-zA-Z0-9\u00C0-\u024F]/g, '_').slice(0, 80);
+
+  const downloadAllNotesAsMd = async () => {
+    try {
+      const { notes } = await fetchCurrentData();
+      if (!notes.length) { toast.info(t('importError')); return; }
+      notes.forEach((note: any) => {
+        downloadBlob(`# ${note.title}\n\n${note.content || ''}`, `${sanitizeFilename(note.title)}.md`, 'text/markdown');
+      });
+    } catch (e) { console.error(e); }
+  };
+
+  const downloadAllNotesAsTxt = async () => {
+    try {
+      const { notes } = await fetchCurrentData();
+      if (!notes.length) return;
+      notes.forEach((note: any) => {
+        downloadBlob(`${note.title}\n\n${note.content || ''}`, `${sanitizeFilename(note.title)}.txt`, 'text/plain');
+      });
+    } catch (e) { console.error(e); }
   };
 
   const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    
+    const input = event.target;
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
-        
-        if (data.notes) localStorage.setItem('notes-app-notes', JSON.stringify(data.notes));
-        if (data.folders) localStorage.setItem('notes-app-folders', JSON.stringify(data.folders));
-        if (data.todos) localStorage.setItem('notes-app-todos', JSON.stringify(data.todos));
-        if (data.customization) localStorage.setItem('notes-customization', JSON.stringify(data.customization));
-        
-        window.location.reload();
+        if (typeof data !== 'object' || data === null) throw new Error('Invalid file');
+
+        if (user) {
+          // Cloud import — merge via upsert, never delete existing
+          const ops: Promise<any>[] = [];
+          if (Array.isArray(data.notes) && data.notes.length) {
+            ops.push(supabase.from('notes').upsert(data.notes.map((n: any) => ({
+              id: n.id || crypto.randomUUID(),
+              user_id: user.id,
+              title: String(n.title || 'Untitled').slice(0, 500),
+              content: String(n.content || ''),
+              type: ['text', 'drawing', 'workflow'].includes(n.type) ? n.type : 'text',
+              folder_id: n.folderId || n.folder_id || null,
+              tags: Array.isArray(n.tags) ? n.tags : [],
+              created_at: n.createdAt || n.created_at || new Date().toISOString(),
+              updated_at: n.updatedAt || n.updated_at || new Date().toISOString(),
+              linked_date: n.linkedDate || n.linked_date || null,
+              drawing_data: n.drawingData || n.drawing_data || null,
+              workflow_data: n.workflowData || n.workflow_data || null,
+              password: n.password || null,
+            })), { onConflict: 'id' }));
+          }
+          if (Array.isArray(data.folders) && data.folders.length) {
+            ops.push(supabase.from('folders').upsert(data.folders.map((f: any) => ({
+              id: f.id || crypto.randomUUID(),
+              user_id: user.id,
+              name: String(f.name || 'Folder').slice(0, 200),
+              color: String(f.color || '#3b82f6'),
+              parent_id: f.parentId || f.parent_id || null,
+            })), { onConflict: 'id' }));
+          }
+          if (Array.isArray(data.todos) && data.todos.length) {
+            ops.push(supabase.from('todos').upsert(data.todos.map((t: any) => ({
+              id: t.id || crypto.randomUUID(),
+              user_id: user.id,
+              text: String(t.text || '').slice(0, 1000),
+              completed: !!t.completed,
+              note_id: t.noteId || t.note_id || null,
+              created_at: t.createdAt || t.created_at || new Date().toISOString(),
+            })), { onConflict: 'id' }));
+          }
+          if (Array.isArray(data.calendarTasks) && data.calendarTasks.length) {
+            ops.push(supabase.from('calendar_tasks').upsert(data.calendarTasks.map((t: any) => ({
+              id: t.id || crypto.randomUUID(),
+              user_id: user.id,
+              text: String(t.text || '').slice(0, 1000),
+              completed: !!t.completed,
+              date: t.date,
+              created_at: t.createdAt || t.created_at || new Date().toISOString(),
+              reminder_time: t.reminderTime || t.reminder_time || null,
+              reminder_notified: !!(t.reminderNotified || t.reminder_notified),
+            })), { onConflict: 'id' }));
+          }
+          if (data.customization && typeof data.customization === 'object') {
+            ops.push(supabase.from('user_customizations').upsert({
+              user_id: user.id,
+              customization_data: data.customization,
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' }));
+          }
+          const results = await Promise.all(ops);
+          const errs = results.filter((r: any) => r.error);
+          if (errs.length) {
+            console.error('Import errors:', errs.map((r: any) => r.error));
+            toast.error(t('importError'));
+            return;
+          }
+          toast.success(t('importData'));
+          setTimeout(() => window.location.reload(), 600);
+        } else {
+          if (Array.isArray(data.notes)) localStorage.setItem('notes-app-notes', JSON.stringify(data.notes));
+          if (Array.isArray(data.folders)) localStorage.setItem('notes-app-folders', JSON.stringify(data.folders));
+          if (Array.isArray(data.todos)) localStorage.setItem('notes-app-todos', JSON.stringify(data.todos));
+          if (Array.isArray(data.calendarTasks)) localStorage.setItem('notes-app-calendar-tasks', JSON.stringify(data.calendarTasks));
+          if (data.customization) localStorage.setItem('notes-customization', JSON.stringify(data.customization));
+          toast.success(t('importData'));
+          setTimeout(() => window.location.reload(), 400);
+        }
       } catch (error) {
         console.error('Error importing data:', error);
-        alert(t('importError'));
+        toast.error(t('importError'));
+      } finally {
+        if (input) input.value = '';
       }
     };
     reader.readAsText(file);
