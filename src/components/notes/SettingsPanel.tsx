@@ -226,7 +226,7 @@ export function SettingsPanel() {
 
         if (user) {
           // Cloud import — merge via upsert, never delete existing
-          const ops: Promise<any>[] = [];
+          const ops: any[] = [];
           if (Array.isArray(data.notes) && data.notes.length) {
             ops.push(supabase.from('notes').upsert(data.notes.map((n: any) => ({
               id: n.id || crypto.randomUUID(),
