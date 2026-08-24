@@ -130,11 +130,7 @@ export function AIAssistant({ noteTitle, noteContent, onInsertText, onClose }: A
         }
       }
 
-      // Usage is now tracked server-side in the edge function
-      // Just refresh the frontend counter
-      if (assistantSoFar) {
-        refreshLimits();
-      }
+
     } catch (e: any) {
       console.error('AI error:', e);
       toast.error(e.message || 'Erro ao consultar o assistente');
