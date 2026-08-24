@@ -245,73 +245,11 @@ export type Database = {
         }
         Relationships: []
       }
-      user_subscriptions: {
-        Row: {
-          ai_daily_limit: number
-          created_at: string
-          current_period_end: string | null
-          id: string
-          plan: string
-          status: string
-          storage_limit_bytes: number
-          stripe_customer_id: string | null
-          stripe_price_id: string | null
-          stripe_product_id: string | null
-          stripe_subscription_id: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          ai_daily_limit?: number
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          plan?: string
-          status?: string
-          storage_limit_bytes?: number
-          stripe_customer_id?: string | null
-          stripe_price_id?: string | null
-          stripe_product_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          ai_daily_limit?: number
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          plan?: string
-          status?: string
-          storage_limit_bytes?: number
-          stripe_customer_id?: string | null
-          stripe_price_id?: string | null
-          stripe_product_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_my_usage_summary: {
-        Args: never
-        Returns: {
-          ai_daily_limit: number
-          ai_uses_today: number
-          can_use_ai: boolean
-          has_storage_capacity: boolean
-          plan: string
-          storage_limit_bytes: number
-          storage_used_bytes: number
-          subscription_end: string
-          subscription_status: string
-        }[]
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
