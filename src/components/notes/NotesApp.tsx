@@ -14,7 +14,6 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useCloudSync } from '@/hooks/useCloudSync';
 import { useCustomization } from '@/hooks/useCustomization';
 import { CustomizationContext } from '@/hooks/customizationContext';
-import { useSubscription } from '@/hooks/useSubscription';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NoteType, Note } from '@/types/notes';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -59,7 +58,6 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     resetForUserChange: resetCustomizationForUserChange,
     setIsDark: setCustomIsDark,
   } = customizationCtx;
-  const { checkSubscription } = useSubscription();
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -232,16 +230,6 @@ export function NotesApp({ onSignOut, isGuest }: NotesAppProps) {
     onToggleSidebar: () => setSidebarCollapsed(prev => !prev),
     onAdvancedSearch: () => setShowAdvancedSearch(true),
   });
-
-  // Handle checkout success redirect
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('checkout') === 'success') {
-      toast.success('Subscription activated! Refreshing...');
-      checkSubscription();
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, [checkSubscription]);
 
 
   const handleImportNotes = useCallback(() => {
