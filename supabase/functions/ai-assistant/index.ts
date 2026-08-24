@@ -37,34 +37,8 @@ serve(async (req) => {
 
     const userId = userData.user.id;
 
-    // Check AI usage limits server-side
-    const { data: usageData, error: usageError } = await supabaseClient.rpc('get_my_usage_summary');
-    // Since this is called with service_role, we need to check manually
-    const { data: subData } = await supabaseClient
-      .from('user_subscriptions')
-      .select('plan, ai_daily_limit')
-      .eq('user_id', userId)
-      .maybeSingle();
 
-    const plan = subData?.plan || 'free';
-    const aiDailyLimit = subData?.ai_daily_limit || 5;
 
-    if (plan !== 'pro') {
-      // Count today's usage
-      const today = new Date().toISOString().split('T')[0];
-      const { count, error: countError } = await supabaseClient
-        .from('ai_usage_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('request_date', today);
-
-      const usesToday = count || 0;
-      if (usesToday >= aiDailyLimit) {
-        return new Response(JSON.stringify({ error: `AI daily limit reached (${usesToday}/${aiDailyLimit}). Upgrade to Pro for unlimited access.` }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
 
     const { messages, noteContent, noteTitle } = await req.json();
 
